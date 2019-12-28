@@ -1,12 +1,10 @@
 const parsers = require('../../utils/parsers');
 const { AirParsingError } = require('./AirErrors');
+const { logger: log } = require('../../utils/logger');
 
 function ProviderSegmentOrderReducer(acc, { ProviderSegmentOrder }) {
-  const x = parseInt(ProviderSegmentOrder, 10);
-  if (x > acc) {
-    return x;
-  }
-  return acc;
+    const x = parseInt(ProviderSegmentOrder, 10);
+    return x > acc ? x : acc;
 }
 
 /**
@@ -15,29 +13,29 @@ function ProviderSegmentOrderReducer(acc, { ProviderSegmentOrder }) {
  * @returns {{amount: number, units: string}}
  */
 function getBaggage(baggageAllowance) {
-  // Checking for allowance
-  if (
-    !baggageAllowance
-    || (
-      !baggageAllowance['air:NumberOfPieces']
-      && !baggageAllowance['air:MaxWeight']
-    )
-  ) {
-    console.warn('Baggage information is not number and is not weight!', JSON.stringify(baggageAllowance));
-    return { units: 'piece', amount: 0 };
-  }
-  // Checking for max weight
-  if (baggageAllowance['air:MaxWeight']) {
+    // Checking for allowance
+    if (
+        !baggageAllowance
+        || (
+            !baggageAllowance['air:NumberOfPieces']
+            && !baggageAllowance['air:MaxWeight']
+        )
+    ) {
+        log.warn('Baggage information is not number and is not weight!', baggageAllowance);
+        return { units: 'piece', amount: 0 };
+    }
+    // Checking for max weight
+    if (baggageAllowance['air:MaxWeight']) {
+        return {
+            units: baggageAllowance['air:MaxWeight'].Unit.toLowerCase(),
+            amount: Number(baggageAllowance['air:MaxWeight'].Value),
+        };
+    }
+    // Returning pieces
     return {
-      units: baggageAllowance['air:MaxWeight'].Unit.toLowerCase(),
-      amount: Number(baggageAllowance['air:MaxWeight'].Value),
+        units: 'piece',
+        amount: Number(baggageAllowance['air:NumberOfPieces']),
     };
-  }
-  // Returning pieces
-  return {
-    units: 'piece',
-    amount: Number(baggageAllowance['air:NumberOfPieces']),
-  };
 }
 
 /**
@@ -46,329 +44,326 @@ function getBaggage(baggageAllowance) {
  * @returns {{amount: number, units: string}}
  */
 function getBaggageInfo(info) {
-  // Checking for allowance
-  let baggageInfo = { units: 'piece', amount: 0 };
+    // Checking for allowance
+    let baggageInfo = { units: 'piece', amount: 0 };
 
-  if (typeof info === 'undefined' || info == null) {
-    return baggageInfo;
-  }
-
-  if (Object.prototype.hasOwnProperty.call(info, 'air:BagDetails')) {
-    baggageInfo.detail = info['air:BagDetails'].map((detail) => {
-      return {
-        applicableBags: detail.ApplicableBags,
-        basePrice: detail.BasePrice,
-        totalPrice: detail.TotalPrice,
-        approximateBasePrice: detail.ApproximateBasePrice,
-        approximateTotalPrice: detail.ApproximateTotalPrice,
-        restrictionText: detail['air:BaggageRestriction']['air:TextInfo'],
-      };
-    });
-  }
-
-  if (Object.prototype.hasOwnProperty.call(info, 'air:TextInfo')) {
-    const match = info['air:TextInfo'][0].match(/^(\d+)([KP]+)$/);
-
-    if (match) {
-      if (match[2] === 'P') {
-        baggageInfo = Object.assign(baggageInfo, { units: 'piece', amount: match[1] });
-      } else if (match[2] === 'K') {
-        baggageInfo = Object.assign(baggageInfo, { units: 'kilograms', amount: match[1] });
-      }
-    } else {
-      console.warn('Baggage information is not number and is not weight!', JSON.stringify(info));
+    if (typeof info === 'undefined' || info == null) {
+        return baggageInfo;
     }
-  } else {
-    console.warn('Unknown', JSON.stringify(info));
-  }
 
-  return baggageInfo;
+    if (Object.prototype.hasOwnProperty.call(info, 'air:BagDetails')) {
+        baggageInfo.detail = info['air:BagDetails'].map(detail => ({
+            applicableBags: detail.ApplicableBags,
+            basePrice: detail.BasePrice,
+            totalPrice: detail.TotalPrice,
+            approximateBasePrice: detail.ApproximateBasePrice,
+            approximateTotalPrice: detail.ApproximateTotalPrice,
+            restrictionText: detail['air:BaggageRestriction']['air:TextInfo'],
+        }));
+    }
+
+    if (Object.prototype.hasOwnProperty.call(info, 'air:TextInfo')) {
+        const match = info['air:TextInfo'][0].match(/^(\d+)([KP]+)$/);
+
+        if (match) {
+            if (match[2] === 'P') {
+                baggageInfo = Object.assign(baggageInfo, { units: 'piece', amount: match[1] });
+            } else if (match[2] === 'K') {
+                baggageInfo = Object.assign(baggageInfo, { units: 'kilograms', amount: match[1] });
+            }
+        } else {
+            log.warn('Baggage information is not number and is not weight!', info);
+        }
+    } else {
+        log.warn('Unknown', info);
+    }
+
+    return baggageInfo;
 }
 
 function formatSegment(segment) {
-  return {
-    from: segment.Origin,
-    to: segment.Destination,
-    group: Number(segment.Group),
-    departure: segment.DepartureTime,
-    arrival: segment.ArrivalTime,
-    airline: segment.Carrier,
-    flightNumber: segment.FlightNumber,
-    uapi_segment_ref: segment.Key,
-  };
+    return {
+        from: segment.Origin,
+        to: segment.Destination,
+        group: Number(segment.Group),
+        departure: segment.DepartureTime,
+        arrival: segment.ArrivalTime,
+        airline: segment.Carrier,
+        flightNumber: segment.FlightNumber,
+        uapi_segment_ref: segment.Key,
+    };
 }
 
 function formatServiceSegment(segment, remark) {
-  return {
-    ...parsers.serviceSegment(remark['passive:Text']),
-    carrier: segment.SupplierCode,
-    airport: segment.Origin,
-    date: segment.StartDate,
-    index: segment.index,
-  };
+    return {
+        ...parsers.serviceSegment(remark['passive:Text']),
+        carrier: segment.SupplierCode,
+        airport: segment.Origin,
+        date: segment.StartDate,
+        index: segment.index,
+    };
 }
 
 function formatPrices(prices) {
-  return {
-    basePrice: prices.BasePrice,
-    taxes: prices.Taxes,
-    equivalentBasePrice: prices.EquivalentBasePrice,
-    totalPrice: prices.TotalPrice,
-  };
+    return {
+        basePrice: prices.BasePrice,
+        taxes: prices.Taxes,
+        equivalentBasePrice: prices.EquivalentBasePrice,
+        totalPrice: prices.TotalPrice,
+    };
 }
 
 
 function formatTrip(segment, flightDetails) {
-  const flightInfo = flightDetails
-    ? Object.keys(flightDetails).map(
-      detailsKey => flightDetails[detailsKey]
-    )
-    : [];
-  const plane = flightInfo.map(details => details.Equipment || 'Unknown');
-  const duration = flightInfo.map(details => details.FlightTime || 0);
-  const techStops = flightInfo.slice(1).map(details => details.Origin);
-  return {
-    ...formatSegment(segment),
-    serviceClass: segment.CabinClass,
-    plane,
-    duration,
-    techStops,
-  };
+    const flightInfo = flightDetails
+        ? Object.keys(flightDetails).map(
+            detailsKey => flightDetails[detailsKey]
+        )
+        : [];
+    const plane = flightInfo.map(details => details.Equipment || 'Unknown');
+    const duration = flightInfo.map(details => details.FlightTime || 0);
+    const techStops = flightInfo.slice(1).map(details => details.Origin);
+    return {
+        ...formatSegment(segment),
+        serviceClass: segment.CabinClass,
+        plane,
+        duration,
+        techStops,
+    };
 }
 
 function formatAirExchangeBundle(bundle) {
-  return {
-    addCollection: bundle.AddCollection,
-    changeFee: bundle.ChangeFee,
-    exchangeAmount: bundle.ExchangeAmount,
-    refund: bundle.Refund,
-  };
+    return {
+        addCollection: bundle.AddCollection,
+        changeFee: bundle.ChangeFee,
+        exchangeAmount: bundle.ExchangeAmount,
+        refund: bundle.Refund,
+    };
 }
 
 function formatPassengerCategories(pricingInfo) {
-  const passengerCounts = {};
+    const passengerCounts = {};
 
-  const passengerCategories = Object.keys(pricingInfo)
-    .reduce((acc, key) => {
-      const passengerFare = pricingInfo[key];
-      let code = passengerFare['air:PassengerType'];
+    const passengerCategories = Object.keys(pricingInfo)
+        .reduce((acc, key) => {
+            const passengerFare = pricingInfo[key];
+            let code = passengerFare['air:PassengerType'];
 
-      if (Object.prototype.toString.call(code) === '[object String]') { // air:PassengerType in fullCollapseList_obj ParserUapi param
-        passengerCounts[code] = 1;
+            if (Object.prototype.toString.call(code) === '[object String]') { // air:PassengerType in fullCollapseList_obj ParserUapi param
+                passengerCounts[code] = 1;
 
-        // air:PassengerType in noCollapseList
-      } else if (Array.isArray(code) && code.constructor === Array) { // ParserUapi param
-        const count = code.length;
-        const list = Array.from(new Set((code.map((item) => {
-          if (Object.prototype.toString.call(item) === '[object String]') {
-            return item;
-          }
-          if (Object.prototype.toString.call(item) === '[object Object]' && item.Code) {
-            // air:PassengerType in fullCollapseList_obj like above,
-            // but there is Age or other info, except Code
-            return item.Code;
-          }
-          throw new AirParsingError.PTCIsNotSet();
-        }))));
+                // air:PassengerType in noCollapseList
+            } else if (Array.isArray(code) && code.constructor === Array) { // ParserUapi param
+                const count = code.length;
+                if (!count) {
+                    throw new AirParsingError.PTCIsNotSet();
+                }
 
-        [code] = list;
-        if (!list[0] || list.length !== 1) { // TODO throw error
-          console.log('Warning: different categories '
-            + list.join() + ' in single fare calculation ' + key + ' in fare ' + key);
-        }
-        passengerCounts[code] = count;
-      } else {
-        throw new AirParsingError.PTCTypeInvalid();
-      }
+                const list = Array.from(new Set((code.map(item => {
+                    if (Object.prototype.toString.call(item) === '[object String]') {
+                        return item;
+                    }
+                    if (Object.prototype.toString.call(item) === '[object Object]' && item.Code) {
+                        // air:PassengerType in fullCollapseList_obj like above,
+                        // but there is Age or other info, except Code
+                        return item.Code;
+                    }
+                    throw new AirParsingError.PTCIsNotSet();
+                }))));
 
-      return {
-        ...acc,
-        [code]: passengerFare
-      };
-    }, {});
+                [code] = list;
+                if (!list[0] || list.length !== 1) { // TODO throw error
+                    log.warn('Different categories '
+                        + list.join() + ' in single fare calculation ' + key + ' in fare ' + key);
+                }
+                passengerCounts[code] = count;
+            } else {
+                throw new AirParsingError.PTCTypeInvalid();
+            }
 
-  const passengerFares = Object.keys(passengerCategories)
-    .reduce(
-      (memo, ptc) => Object.assign(memo, {
-        [ptc]: {
-          totalPrice: passengerCategories[ptc].TotalPrice,
-          basePrice: passengerCategories[ptc].BasePrice,
-          equivalentBasePrice: passengerCategories[ptc].EquivalentBasePrice,
-          taxes: passengerCategories[ptc].Taxes,
-          fareCalc: passengerCategories[ptc].FareCalc,
-        },
-      }), {}
-    );
+            return {
+                ...acc,
+                [code]: passengerFare
+            };
+        }, {});
 
-  return {
-    passengerCounts,
-    passengerCategories,
-    passengerFares,
-  };
+    const passengerFares = Object.keys(passengerCategories)
+        .reduce((memo, ptc) => Object.assign(memo, {
+            [ptc]: {
+                totalPrice: passengerCategories[ptc].TotalPrice,
+                basePrice: passengerCategories[ptc].BasePrice,
+                equivalentBasePrice: passengerCategories[ptc].EquivalentBasePrice,
+                taxes: passengerCategories[ptc].Taxes,
+                fareCalc: passengerCategories[ptc].FareCalc,
+            },
+        }), {});
+
+    return {
+        passengerCounts,
+        passengerCategories,
+        passengerFares,
+    };
 }
 
 function formatFarePricingInfo(fare) {
-  const changePenalty = {};
-  const cancelPenalty = {};
+    const changePenalty = {};
+    const cancelPenalty = {};
 
-  if (Object.prototype.hasOwnProperty.call(fare, 'air:ChangePenalty')) {
-    const fareChangePenalty = fare['air:ChangePenalty'];
+    if (Object.prototype.hasOwnProperty.call(fare, 'air:ChangePenalty')) {
+        const fareChangePenalty = fare['air:ChangePenalty'];
 
-    if (typeof fareChangePenalty['air:Amount'] !== 'undefined') {
-      changePenalty.amount = fareChangePenalty['air:Amount'];
+        if (typeof fareChangePenalty['air:Amount'] !== 'undefined') {
+            changePenalty.amount = fareChangePenalty['air:Amount'];
+        }
+        if (typeof fareChangePenalty['air:Percentage'] !== 'undefined') {
+            changePenalty.percentage = fareChangePenalty['air:Percentage'];
+        }
+        if (typeof fareChangePenalty.PenaltyApplies !== 'undefined') {
+            changePenalty.penaltyApplies = fareChangePenalty.PenaltyApplies;
+        }
     }
-    if (typeof fareChangePenalty['air:Percentage'] !== 'undefined') {
-      changePenalty.percentage = fareChangePenalty['air:Percentage'];
+
+    if (Object.prototype.hasOwnProperty.call(fare, 'air:CancelPenalty')) {
+        const fareCancelPenalty = fare['air:CancelPenalty'];
+
+        if (typeof fareCancelPenalty['air:Amount'] !== 'undefined') {
+            cancelPenalty.amount = fareCancelPenalty['air:Amount'];
+        }
+        if (typeof fareCancelPenalty['air:Percentage'] !== 'undefined') {
+            cancelPenalty.percentage = fareCancelPenalty['air:Percentage'];
+        }
+        if (typeof fareCancelPenalty.PenaltyApplies !== 'undefined') {
+            cancelPenalty.penaltyApplies = fareCancelPenalty.PenaltyApplies;
+        }
+        if (typeof fareCancelPenalty.NoShow !== 'undefined') {
+            cancelPenalty.noShow = fareCancelPenalty.NoShow;
+        }
     }
-    if (typeof fareChangePenalty.PenaltyApplies !== 'undefined') {
-      changePenalty.penaltyApplies = fareChangePenalty.PenaltyApplies;
+
+    let refundable = false;
+
+    if (Object.prototype.hasOwnProperty.call(fare, 'Refundable')) {
+        refundable = fare.Refundable;
     }
-  }
 
-  if (Object.prototype.hasOwnProperty.call(fare, 'air:CancelPenalty')) {
-    const fareCancelPenalty = fare['air:CancelPenalty'];
+    let latestTicketingTime = null;
 
-    if (typeof fareCancelPenalty['air:Amount'] !== 'undefined') {
-      cancelPenalty.amount = fareCancelPenalty['air:Amount'];
+    if (Object.prototype.hasOwnProperty.call(fare, 'LatestTicketingTime')) {
+        latestTicketingTime = fare.LatestTicketingTime;
     }
-    if (typeof fareCancelPenalty['air:Percentage'] !== 'undefined') {
-      cancelPenalty.percentage = fareCancelPenalty['air:Percentage'];
+
+    let eTicketability = false;
+
+    if (Object.prototype.hasOwnProperty.call(fare, 'eTicketability')) {
+        // eslint-disable-next-line prefer-destructuring
+        eTicketability = fare.eTicketability;
     }
-    if (typeof fareCancelPenalty.PenaltyApplies !== 'undefined') {
-      cancelPenalty.penaltyApplies = fareCancelPenalty.PenaltyApplies;
-    }
-    if (typeof fareCancelPenalty.NoShow !== 'undefined') {
-      cancelPenalty.noShow = fareCancelPenalty.NoShow;
-    }
-  }
 
-  let refundable = false;
-
-  if (Object.prototype.hasOwnProperty.call(fare, 'Refundable')) {
-    refundable = fare.Refundable;
-  }
-
-  let latestTicketingTime = null;
-
-  if (Object.prototype.hasOwnProperty.call(fare, 'LatestTicketingTime')) {
-    latestTicketingTime = fare.LatestTicketingTime;
-  }
-
-  let eTicketability = false;
-
-  if (Object.prototype.hasOwnProperty.call(fare, 'eTicketability')) {
-    // eslint-disable-next-line prefer-destructuring
-    eTicketability = fare.eTicketability;
-  }
-
-  return {
-    latestTicketingTime,
-    eTicketability,
-    refundable,
-    changePenalty,
-    cancelPenalty,
-  };
+    return {
+        latestTicketingTime,
+        eTicketability,
+        refundable,
+        changePenalty,
+        cancelPenalty,
+    };
 }
 
 function formatLowFaresSearch(searchRequest, searchResult) {
-  const pricesList = searchResult['air:AirPricePointList'];
-  const fareInfos = searchResult['air:FareInfoList'];
-  const segments = searchResult['air:AirSegmentList'];
-  const flightDetails = searchResult['air:FlightDetailsList'];
-  const { provider } = searchRequest;
+    const pricesList = searchResult['air:AirPricePointList'];
+    const fareInfos = searchResult['air:FareInfoList'];
+    const segments = searchResult['air:AirSegmentList'];
+    const flightDetails = searchResult['air:FlightDetailsList'];
+    const { provider } = searchRequest;
 
-  // const legs = _.first(_.toArray(searchResult['air:RouteList']))['air:Leg'];
+    // const legs = _.first(_.toArray(searchResult['air:RouteList']))['air:Leg'];
 
-  // TODO filter pricesList by CompleteItinerary=true & ETicketability = Yes, etc
+    // TODO filter pricesList by CompleteItinerary=true & ETicketability = Yes, etc
 
-  const fares = [];
+    const fares = [];
 
-  Object.entries(pricesList).forEach(([fareKey, price]) => {
-    const [firstKey] = Object.keys(price['air:AirPricingInfo']);
-    const thisFare = price['air:AirPricingInfo'][firstKey]; // get trips from first reservation
-    if (!thisFare.PlatingCarrier) {
-      return;
-    }
-
-    const directions = thisFare['air:FlightOptionsList'].map(direction => Object.values(direction['air:Option']).map((option) => {
-      const trips = option['air:BookingInfo'].map(
-        (segmentInfo) => {
-          const fareInfo = fareInfos[segmentInfo.FareInfoRef];
-          const segment = segments[segmentInfo.SegmentRef];
-          const tripFlightDetails = segment['air:FlightDetailsRef'].map(
-            flightDetailsRef => flightDetails[flightDetailsRef]
-          );
-          const seatsAvailable = (
-            segment['air:AirAvailInfo']
-              && segment['air:AirAvailInfo'].ProviderCode === provider)
-            ? (Number(
-              segment['air:AirAvailInfo']['air:BookingCodeInfo'].BookingCounts
-                .match(new RegExp(`${segmentInfo.BookingCode}(\\d+)`))[1]
-            ))
-            : null;
-          return Object.assign(
-            formatTrip(segment, tripFlightDetails),
-            {
-              serviceClass: segmentInfo.CabinClass,
-              bookingClass: segmentInfo.BookingCode,
-              baggage: [getBaggage(fareInfo['air:BaggageAllowance'])],
-              fareBasisCode: fareInfo.FareBasis,
-            },
-            seatsAvailable ? { seatsAvailable } : null
-          );
+    Object.entries(pricesList).forEach(([fareKey, price]) => {
+        const [firstKey] = Object.keys(price['air:AirPricingInfo']);
+        const thisFare = price['air:AirPricingInfo'][firstKey]; // get trips from first reservation
+        if (!thisFare.PlatingCarrier) {
+            return;
         }
-      );
-      return {
-        from: direction.Origin,
-        to: direction.Destination,
-        // duration
-        // TODO get overnight stops, etc from connection
-        platingCarrier: thisFare.PlatingCarrier,
-        segments: trips,
-      };
-    }));
 
-    const { passengerCounts, passengerFares } = this.formatPassengerCategories(price['air:AirPricingInfo']);
+        const directions = thisFare['air:FlightOptionsList'].map(direction => Object.values(direction['air:Option']).map(option => {
+            const trips = option['air:BookingInfo'].map(segmentInfo => {
+                const fareInfo = fareInfos[segmentInfo.FareInfoRef];
+                const segment = segments[segmentInfo.SegmentRef];
+                const tripFlightDetails = segment['air:FlightDetailsRef'].map(
+                    flightDetailsRef => flightDetails[flightDetailsRef]
+                );
+                const seatsAvailable = (
+                    segment['air:AirAvailInfo'] && segment['air:AirAvailInfo'].ProviderCode === provider)
+                    ? (Number(
+                        segment['air:AirAvailInfo']['air:BookingCodeInfo'].BookingCounts
+                            .match(new RegExp(`${segmentInfo.BookingCode}(\\d+)`))[1]
+                    ))
+                    : null;
+                return Object.assign(
+                    formatTrip(segment, tripFlightDetails),
+                    {
+                        serviceClass: segmentInfo.CabinClass,
+                        bookingClass: segmentInfo.BookingCode,
+                        baggage: [getBaggage(fareInfo['air:BaggageAllowance'])],
+                        fareBasisCode: fareInfo.FareBasis,
+                    },
+                    seatsAvailable ? { seatsAvailable } : null
+                );
+            });
+            return {
+                from: direction.Origin,
+                to: direction.Destination,
+                // duration
+                // TODO get overnight stops, etc from connection
+                platingCarrier: thisFare.PlatingCarrier,
+                segments: trips,
+            };
+        }));
 
-    const result = {
-      totalPrice: price.TotalPrice,
-      basePrice: price.BasePrice,
-      taxes: price.Taxes,
-      directions,
-      bookingComponents: [
-        {
-          totalPrice: price.TotalPrice,
-          basePrice: price.BasePrice,
-          taxes: price.Taxes,
-          uapi_fare_reference: fareKey, // TODO
-        },
-      ],
-      passengerFares,
-      passengerCounts,
-    };
+        const { passengerCounts, passengerFares } = this.formatPassengerCategories(price['air:AirPricingInfo']);
 
-    fares.push(result);
-  });
+        const result = {
+            totalPrice: price.TotalPrice,
+            basePrice: price.BasePrice,
+            taxes: price.Taxes,
+            directions,
+            bookingComponents: [
+                {
+                    totalPrice: price.TotalPrice,
+                    basePrice: price.BasePrice,
+                    taxes: price.Taxes,
+                    uapi_fare_reference: fareKey, // TODO
+                },
+            ],
+            passengerFares,
+            passengerCounts,
+        };
 
-  fares.sort((a, b) => parseFloat(a.totalPrice.substr(3)) - parseFloat(b.totalPrice.substr(3)));
+        fares.push(result);
+    });
 
-  if (searchRequest.faresOnly === false) {
-    const result = {
-      fares
-    };
-    if ({}.hasOwnProperty.call(searchResult, 'TransactionId')) {
-      result.transactionId = searchResult.TransactionId;
+    fares.sort((a, b) => parseFloat(a.totalPrice.substr(3)) - parseFloat(b.totalPrice.substr(3)));
+
+    if (searchRequest.faresOnly === false) {
+        const result = {
+            fares
+        };
+        if ({}.hasOwnProperty.call(searchResult, 'TransactionId')) {
+            result.transactionId = searchResult.TransactionId;
+        }
+        if ({}.hasOwnProperty.call(searchResult, 'SearchId')) {
+            result.searchId = searchResult.SearchId;
+        }
+        if ({}.hasOwnProperty.call(searchResult, 'air:AsyncProviderSpecificResponse')) {
+            result.hasMoreResults = searchResult['air:AsyncProviderSpecificResponse'].MoreResults;
+            result.providerCode = searchResult['air:AsyncProviderSpecificResponse'].ProviderCode;
+        }
+        return result;
     }
-    if ({}.hasOwnProperty.call(searchResult, 'SearchId')) {
-      result.searchId = searchResult.SearchId;
-    }
-    if ({}.hasOwnProperty.call(searchResult, 'air:AsyncProviderSpecificResponse')) {
-      result.hasMoreResults = searchResult['air:AsyncProviderSpecificResponse'].MoreResults;
-      result.providerCode = searchResult['air:AsyncProviderSpecificResponse'].ProviderCode;
-    }
-    return result;
-  }
-  return fares;
+    return fares;
 }
 
 /**
@@ -381,74 +376,74 @@ function formatLowFaresSearch(searchRequest, searchResult) {
  * @return {*}
  */
 function setIndexesForSegments(
-  segmentsObject = null,
-  serviceSegmentsObject = null
+    segmentsObject = null,
+    serviceSegmentsObject = null
 ) {
-  const segments = segmentsObject
-    ? Object.keys(segmentsObject).map(k => segmentsObject[k])
-    : null;
+    const segments = segmentsObject
+        ? Object.values(segmentsObject) // Object.values(segmentObject)
+        : null;
 
-  const serviceSegments = serviceSegmentsObject
-    ? Object.keys(serviceSegmentsObject).map(k => serviceSegmentsObject[k])
-    : null;
+    const serviceSegments = serviceSegmentsObject
+        ? Object.keys(serviceSegmentsObject).map(k => serviceSegmentsObject[k])
+        : null;
 
-  if (segments === null && serviceSegments === null) {
-    return { segments, serviceSegments };
-  }
+    if (segments === null && serviceSegments === null) {
+        return { segments, serviceSegments };
+    }
 
-  if (segments !== null && serviceSegments === null) {
-    const segmentsNew = segments.map((segment, key) => ({
-      ...segment,
-      index: key + 1,
-    }));
-    return { segments: segmentsNew, serviceSegments };
-  }
+    if (segments !== null && serviceSegments === null) {
+        const segmentsNew = segments.map((segment, key) => ({
+            ...segment,
+            index: key + 1,
+        }));
+        return { segments: segmentsNew, serviceSegments };
+    }
 
-  if (segments === null && serviceSegments !== null) {
-    const serviceSegmentsNew = serviceSegments.map(
-      (segment, key) => ({
-        ...segment,
-        index: key + 1,
-      })
+    if (segments === null && serviceSegments !== null) {
+        const serviceSegmentsNew = serviceSegments.map(
+            (segment, key) => ({
+                ...segment,
+                index: key + 1,
+            })
+        );
+        return { segments, serviceSegments: serviceSegmentsNew };
+    }
+
+    const maxSegmentsSegmentOrder = segments.reduce(ProviderSegmentOrderReducer, 0);
+    const maxServiceSegmentsSegmentOrder = serviceSegments.reduce(ProviderSegmentOrderReducer, 0);
+
+    const maxOrder = Math.max(
+        maxSegmentsSegmentOrder,
+        maxServiceSegmentsSegmentOrder
     );
-    return { segments, serviceSegments: serviceSegmentsNew };
-  }
 
-  const maxSegmentsSegmentOrder = segments.reduce(ProviderSegmentOrderReducer, 0);
-  const maxServiceSegmentsSegmentOrder = serviceSegments.reduce(ProviderSegmentOrderReducer, 0);
+    const allSegments = [];
 
-  const maxOrder = Math.max(
-    maxSegmentsSegmentOrder,
-    maxServiceSegmentsSegmentOrder
-  );
+    for (let i = 1; i <= maxOrder; i += 1) {
+        segments.forEach(s => (Number(s.ProviderSegmentOrder) === i ? allSegments.push(s) : null));
+        serviceSegments.forEach(s => (
+            Number(s.ProviderSegmentOrder) === i ? allSegments.push(s) : null
+        ));
+    }
 
-  const allSegments = [];
+    const indexedSegments = allSegments.map((s, k) => ({ ...s, index: k + 1 }));
 
-  for (let i = 1; i <= maxOrder; i += 1) {
-    segments.forEach(s => (Number(s.ProviderSegmentOrder) === i ? allSegments.push(s) : null));
-    serviceSegments.forEach(s => (
-      Number(s.ProviderSegmentOrder) === i ? allSegments.push(s) : null
-    ));
-  }
-
-  const indexedSegments = allSegments.map((s, k) => ({ ...s, index: k + 1 }));
-
-  return {
-    segments: indexedSegments.filter(s => s.SegmentType === undefined),
-    serviceSegments: indexedSegments.filter(s => s.SegmentType === 'Service'),
-  };
+    return {
+        segments: indexedSegments.filter(s => s.SegmentType === undefined),
+        serviceSegments: indexedSegments.filter(s => s.SegmentType === 'Service'),
+    };
 }
 
 module.exports = {
-  formatLowFaresSearch,
-  formatFarePricingInfo,
-  formatPassengerCategories,
-  formatTrip,
-  formatSegment,
-  formatServiceSegment,
-  formatAirExchangeBundle,
-  formatPrices,
-  setIndexesForSegments,
-  getBaggage,
-  getBaggageInfo,
+    formatLowFaresSearch,
+    formatFarePricingInfo,
+    formatPassengerCategories,
+    formatTrip,
+    formatSegment,
+    formatServiceSegment,
+    formatAirExchangeBundle,
+    formatPrices,
+    setIndexesForSegments,
+    getBaggage,
+    getBaggageInfo,
 };

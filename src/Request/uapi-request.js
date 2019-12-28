@@ -1,22 +1,37 @@
 const handlebars = require('handlebars');
 const axios = require('axios');
-const { pd } = require('pretty-data');
 const {
-  RequestValidationError,
-  RequestRuntimeError,
-  RequestSoapError,
+    RequestValidationError,
+    RequestRuntimeError,
+    RequestSoapError,
 } = require('./RequestErrors');
 const Parser = require('./uapi-parser');
 const errorsConfig = require('./errors-config');
 const prepareRequest = require('./prepare-request');
 const configInit = require('../config');
+const { logger } = require('../utils/logger');
 
 handlebars.registerHelper('equal', require('handlebars-helper-equal'));
+
+const validateParams = (service, auth, reqType) => {
+    if (!service || service.length <= 0) {
+        throw new RequestValidationError.ServiceUrlMissing();
+    }
+    if (!auth || auth.username === undefined || auth.password === undefined) {
+        throw new RequestValidationError.AuthDataMissing();
+    }
+    if (reqType === undefined) {
+        throw new RequestValidationError.RequestTypeUndefined();
+    }
+    if (Object.prototype.toString.call(reqType) !== '[object String]') {
+        throw new RequestRuntimeError.TemplateFileMissing();
+    }
+};
 
 /**
  * basic function for requests/responses
  * @param  {string} service          service url for current response (gateway)
- * @param  {object} auth             {username,password,targetBranch,provider} - credentials
+ * @param  {object} credentials             {username,password,targetBranch,provider} - credentials
  * @param  {string} reqType          url to file with xml for current request
  * @param  {object} rootObject
  * @param  {function} validateFunction function for validation
@@ -26,162 +41,150 @@ handlebars.registerHelper('equal', require('handlebars-helper-equal'));
  * @param  {object} options
  * @return {Promise}                  returning promise for best error handling ever)
  */
-module.exports = function uapiRequest(
-  service,
-  auth,
-  reqType,
-  rootObject,
-  validateFunction,
-  errorHandler,
-  parseFunction,
-  debugMode = false,
-  options = {}
-) {
-  // Assign default value
-  auth.provider = auth.provider || '1G';
-  auth.region = auth.region || 'emea';
+module.exports = (
+    service,
+    credentials,
+    reqType,
+    rootObject,
+    validateFunction,
+    errorHandler,
+    parseFunction,
+    debugMode = false,
+    options = {}
+) => {
+    // Assign default value
+    const auth = { ...credentials };
+    auth.provider = auth.provider || '1G';
+    auth.region = auth.region || 'emea';
 
-  const config = configInit(auth.region);
-  const log = options.logFunction || console.log;
+    const config = configInit(auth.region);
+    const log = options.logFunction || logger;
 
-  // Performing checks
-  if (!service || service.length <= 0) {
-    throw new RequestValidationError.ServiceUrlMissing();
-  }
-  if (!auth || auth.username === undefined || auth.password === undefined) {
-    throw new RequestValidationError.AuthDataMissing();
-  }
-  if (reqType === undefined) {
-    throw new RequestValidationError.RequestTypeUndefined();
-  }
-  if (Object.prototype.toString.call(reqType) !== '[object String]') {
-    throw new RequestRuntimeError.TemplateFileMissing();
-  }
+    // Performing checks
+    validateParams(service, auth, reqType);
 
-  return function serviceFunc(params) {
-    if (debugMode) {
-      log('Input params ', pd.json(params));
-    }
 
-    // create a v47 uAPI parser with default params and request data in env
-    const uParser = new Parser(rootObject, 'v47_0', params, debugMode, null, auth.provider);
+    return parameters => {
+        let params = { ...parameters };
+        if (debugMode) {
+            log.debug('Input params:', params);
+        }
 
-    const validateInput = () => (
-      Promise.resolve(params)
-        .then(validateFunction)
-        .then((validatedParams) => {
-          params = validatedParams;
-          uParser.env = validatedParams;
-          return reqType;
-        }));
+        // create a v47 uAPI parser with default params and request data in env
+        const uParser = new Parser(rootObject, 'v47_0', params, debugMode, null, auth.provider);
 
-    const sendRequest = function (xml) {
-      if (debugMode) {
-        log('Request URL: ', service);
-        log('Request XML: ', pd.xml(xml));
-      }
-      return axios.request({
-        url: service,
-        method: 'POST',
-        timeout: config.timeout || 5000,
-        auth: {
-          username: auth.username,
-          password: auth.password,
-        },
-        headers: {
-          'Accept-Encoding': 'gzip',
-          'Content-Type': 'text/xml',
-        },
-        data: xml,
-      })
-        .then((response) => {
-          if (debugMode) {
-            log('Response SOAP: ', pd.xml(response.data));
-          }
-          return response.data;
-        })
-        .catch((e) => {
-          const rsp = e.response;
+        const validateInput = () => (
+            Promise.resolve(params)
+                .then(validateFunction)
+                .then(validatedParams => {
+                    params = validatedParams;
+                    uParser.env = validatedParams;
+                    return reqType;
+                }));
 
-          if (!rsp) {
+        const sendRequest = xml => {
             if (debugMode) {
-              log('Unexpected Error: ', pd.json(e));
+                log.debug('Request URL:', service);
+                log.debug('Request XML:', xml);
+            }
+            return axios.request({
+                url: service,
+                method: 'POST',
+                timeout: config.timeout || 5000,
+                auth: {
+                    username: auth.username,
+                    password: auth.password,
+                },
+                headers: {
+                    'Accept-Encoding': 'gzip',
+                    'Content-Type': 'text/xml',
+                },
+                data: xml,
+            })
+                .then(response => {
+                    if (debugMode) {
+                        log.debug('Response SOAP:', response.data);
+                    }
+                    return response.data;
+                })
+                .catch(e => {
+                    const rsp = e.response;
+
+                    if (!rsp) {
+                        if (debugMode) {
+                            log.error('Unexpected Error:', e);
+                        }
+
+                        return Promise.reject(new RequestSoapError.SoapUnexpectedError(e));
+                    }
+
+                    const error = {
+                        status: rsp.status,
+                        data: rsp.data,
+                    };
+
+                    if (debugMode) {
+                        log.error('Error Response SOAP:', error);
+                    }
+
+                    return Promise.reject(new RequestSoapError.SoapRequestError(error));
+                });
+        };
+
+        const parseResponse = response => {
+            // if there are web server or HTTP auth errors, uAPI returns a JSON
+            let data = null;
+            try {
+                data = JSON.parse(response);
+            } catch (err) {
+                return uParser.parse(response);
             }
 
-            return Promise.reject(new RequestSoapError.SoapUnexpectedError(e));
-          }
+            // TODO parse JSON errors
+            return Promise.reject(new RequestSoapError.SoapServerError(data));
+        };
 
-          const error = {
-            status: rsp.status,
-            data: rsp.data,
-          };
+        const validateSOAP = parsedXML => {
+            if (parsedXML['SOAP:Fault']) {
+                if (debugMode > 2) {
+                    log.error('Parsed error response', parsedXML);
+                }
+                // use a special uAPI parser configuration for errors, copy detected uAPI version
+                const errParserConfig = errorsConfig();
+                const errParser = new Parser(
+                    rootObject,
+                    uParser.uapi_version,
+                    params,
+                    debugMode,
+                    errParserConfig,
+                    auth.provider
+                );
+                const errData = errParser.mergeLeafRecursive(parsedXML['SOAP:Fault'][0]); // parse error data
+                return errorHandler.call(errParser, errData);
+            }
 
-          if (debugMode) {
-            log('Error Response SOAP: ', pd.json(error));
-          }
+            if (debugMode > 2) {
+                log.debug('Parsed response:', parsedXML);
+            }
 
-          return Promise.reject(new RequestSoapError.SoapRequestError(error));
-        });
+            return parsedXML;
+        };
+
+        const handleSuccess = result => {
+            if (debugMode > 1) {
+                log.debug('Returning result:', result);
+            }
+            return result;
+        };
+
+
+        return validateInput()
+            .then(handlebars.compile)
+            .then(template => prepareRequest(template, auth, params))
+            .then(sendRequest)
+            .then(parseResponse)
+            .then(validateSOAP)
+            .then(parseFunction.bind(uParser)) // TODO: merge Hotels
+            .then(handleSuccess);
     };
-
-    const parseResponse = function (response) {
-      // if there are web server or HTTP auth errors, uAPI returns a JSON
-      let data = null;
-      try {
-        data = JSON.parse(response);
-      } catch (err) {
-        return uParser.parse(response);
-      }
-
-      // TODO parse JSON errors
-      return Promise.reject(new RequestSoapError.SoapServerError(data));
-    };
-
-    const validateSOAP = function (parsedXML) {
-      if (parsedXML['SOAP:Fault']) {
-        if (debugMode > 2) {
-          log('Parsed error response', pd.json(parsedXML));
-        }
-        // use a special uAPI parser configuration for errors, copy detected uAPI version
-        const errParserConfig = errorsConfig();
-        const errParser = new Parser(
-          rootObject,
-          uParser.uapi_version,
-          params,
-          debugMode,
-          errParserConfig,
-          auth.provider
-        );
-        const errData = errParser.mergeLeafRecursive(parsedXML['SOAP:Fault'][0]); // parse error data
-        return errorHandler.call(errParser, errData);
-      }
-
-      if (debugMode > 2) {
-        log('Parsed response', pd.json(parsedXML));
-      }
-
-      return parsedXML;
-    };
-
-    const handleSuccess = function (result) {
-      if (debugMode > 1) {
-        if (typeof result === 'string') {
-          log('Returning result', result);
-        } else {
-          log('Returning result', pd.json(result));
-        }
-      }
-      return result;
-    };
-
-
-    return validateInput()
-      .then(handlebars.compile)
-      .then(template => prepareRequest(template, auth, params))
-      .then(sendRequest)
-      .then(parseResponse)
-      .then(validateSOAP)
-      .then(parseFunction.bind(uParser)) // TODO: merge Hotels
-      .then(handleSuccess);
-  };
 };

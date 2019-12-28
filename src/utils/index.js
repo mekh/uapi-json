@@ -15,21 +15,21 @@ const clone = require('./clone');
 const getHashSubstr = require('./getHashSubstr');
 
 const utils = {
-  renameProperty,
-  firstInObj,
-  beautifyName,
-  price,
-  validate,
-  transform,
-  compose,
-  parsers,
-  hasAllFields,
-  inflate,
-  deflate,
-  getBookingFromUr,
-  getErrorPcc,
-  clone,
-  getHashSubstr,
+    beautifyName,
+    clone,
+    compose,
+    deflate,
+    firstInObj,
+    getBookingFromUr,
+    getErrorPcc,
+    getHashSubstr,
+    hasAllFields,
+    inflate,
+    parsers,
+    price,
+    renameProperty,
+    transform,
+    validate,
 };
 
 module.exports = utils;

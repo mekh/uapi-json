@@ -3,7 +3,7 @@ const createSession = require('./TERMINAL_CREATE_SESSION.handlebars');
 const request = require('./TERMINAL_REQUEST.handlebars');
 
 module.exports = {
-  closeSession,
-  createSession,
-  request,
+    closeSession,
+    createSession,
+    request,
 };

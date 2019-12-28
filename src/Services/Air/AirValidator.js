@@ -3,172 +3,172 @@ const validators = require('./validators');
 const transformers = require('./transformers');
 
 module.exports = {
-  AIR_LOW_FARE_SEARCH_REQUEST: compose(
-    validate(
-      validators.passengers,
-      validators.legs
+    AIR_LOW_FARE_SEARCH_REQUEST: compose(
+        validate(
+            validators.passengers,
+            validators.legs
+        ),
+        transform(
+            transformers.convertPassengersObjectToArray
+        )
     ),
-    transform(
-      transformers.convertPassengersObjectToArray
-    )
-  ),
 
-  AIR_RETRIEVE_LOW_FARE_SEARCH_REQUEST: compose(
-    validate(
-      validators.searchId
+    AIR_RETRIEVE_LOW_FARE_SEARCH_REQUEST: compose(
+        validate(
+            validators.searchId
+        ),
+        transform()
     ),
-    transform()
-  ),
 
-  AIR_PRICE_FARE_RULES_REQUEST: compose(
-    validate(
-      validators.segments,
-      validators.passengers,
-      validators.platingCarrier
+    AIR_PRICE_FARE_RULES_REQUEST: compose(
+        validate(
+            validators.segments,
+            validators.passengers,
+            validators.platingCarrier
+        ),
+        transform(
+            transformers.setBusinessFlag,
+            // transformers.setGroupsForSegments, <air:Connection/> hack fails validation on pre-prod
+            transformers.setHasFareBasisFlag,
+            transformers.convertPassengersObjectToArray
+        )
     ),
-    transform(
-      transformers.setBusinessFlag,
-      // transformers.setGroupsForSegments, <air:Connection/> hack fails validation on pre-prod
-      transformers.setHasFareBasisFlag,
-      transformers.convertPassengersObjectToArray
-    )
-  ),
 
-  AIR_PRICE_REQUEST: compose(
-    validate(
-      validators.segments,
-      validators.passengers,
-      validators.platingCarrier
+    AIR_PRICE_REQUEST: compose(
+        validate(
+            validators.segments,
+            validators.passengers,
+            validators.platingCarrier
+        ),
+        transform(
+            transformers.setBusinessFlag,
+            transformers.convertPassengersObjectToArray,
+            transformers.setGroupsForSegments,
+            transformers.setHasFareBasisFlag
+        )
     ),
-    transform(
-      transformers.setBusinessFlag,
-      transformers.convertPassengersObjectToArray,
-      transformers.setGroupsForSegments,
-      transformers.setHasFareBasisFlag
-    )
-  ),
 
-  AIR_PRICE: compose(
-    validate(
-      validators.segments,
-      validators.platingCarrier
+    AIR_PRICE: compose(
+        validate(
+            validators.segments,
+            validators.platingCarrier
+        ),
+        transform(
+            transformers.setBusinessFlag,
+            transformers.setPassengersAge,
+            transformers.setGroupsForSegments,
+            transformers.setHasFareBasisFlag
+        )
     ),
-    transform(
-      transformers.setBusinessFlag,
-      transformers.setPassengersAge,
-      transformers.setGroupsForSegments,
-      transformers.setHasFareBasisFlag
-    )
-  ),
 
-  AIR_CREATE_RESERVATION_REQUEST: compose(
-    validate(
-      validators.emailOptional,
-      validators.phone,
-      validators.deliveryInfoOptional,
-      validators.pricingSolutionXml
+    AIR_CREATE_RESERVATION_REQUEST: compose(
+        validate(
+            validators.emailOptional,
+            validators.phone,
+            validators.deliveryInfoOptional,
+            validators.pricingSolutionXml
+        ),
+        transform(
+            transformers.setPassengersAge,
+            transformers.addMetaPassengersBooking,
+            transformers.setSegmentRefForSSR
+        )
     ),
-    transform(
-      transformers.setPassengersAge,
-      transformers.addMetaPassengersBooking,
-      transformers.setSegmentRefForSSR
-    )
-  ),
 
-  AIR_TICKET: compose(
-    validate(
-      validators.paramsIsObject,
-      validators.fop,
-      validators.fopCreditCard,
-      validators.pnr
+    AIR_TICKET: compose(
+        validate(
+            validators.paramsIsObject,
+            validators.fop,
+            validators.fopCreditCard,
+            validators.pnr
+        ),
+        transform(
+            transformers.fixCardFop
+        )
     ),
-    transform(
-      transformers.fixCardFop
-    )
-  ),
 
-  AIR_REQUEST_BY_PNR: compose(
-    validate(
-      validators.pnr
+    AIR_REQUEST_BY_PNR: compose(
+        validate(
+            validators.pnr
+        ),
+        transform()
     ),
-    transform()
-  ),
 
-  GDS_QUEUE_PLACE: compose(
-    validate(
-      validators.pnr,
-      validators.pcc,
-      validators.queue
+    GDS_QUEUE_PLACE: compose(
+        validate(
+            validators.pnr,
+            validators.pcc,
+            validators.queue
+        ),
+        transform()
     ),
-    transform()
-  ),
 
-  UNIVERSAL_RECORD_RETRIEVE: compose(
-    validate(
-      validators.universalRecordLocator
+    UNIVERSAL_RECORD_RETRIEVE: compose(
+        validate(
+            validators.universalRecordLocator
+        ),
+        transform()
     ),
-    transform()
-  ),
 
-  AIR_CANCEL_UR: params => params,
-  UNIVERSAL_RECORD_FOID: params => params,
+    AIR_CANCEL_UR: params => params,
+    UNIVERSAL_RECORD_FOID: params => params,
 
-  AIR_FLIGHT_INFORMATION: compose(
-    validate(
-      validators.flightInfo
+    AIR_FLIGHT_INFORMATION: compose(
+        validate(
+            validators.flightInfo
+        ),
+        transform()
     ),
-    transform()
-  ),
 
-  AIR_GET_TICKET: compose(
-    validate(
-      validators.paramsIsObject,
-      validators.ticketNumber
+    AIR_GET_TICKET: compose(
+        validate(
+            validators.paramsIsObject,
+            validators.ticketNumber
+        ),
+        transform()
     ),
-    transform()
-  ),
 
-  AIR_GET_TICKETS: compose(
-    validate(
-      validators.paramsIsObject,
-      validators.reservationLocator
+    AIR_GET_TICKETS: compose(
+        validate(
+            validators.paramsIsObject,
+            validators.reservationLocator
+        ),
+        transform()
     ),
-    transform()
-  ),
 
-  AIR_CANCEL_TICKET: compose(
-    validate(
-      validators.paramsIsObject,
-      validators.pnr,
-      validators.ticketNumber
+    AIR_CANCEL_TICKET: compose(
+        validate(
+            validators.paramsIsObject,
+            validators.pnr,
+            validators.ticketNumber
+        ),
+        transform()
     ),
-    transform()
-  ),
 
-  AIR_CANCEL_PNR: compose(
-    validate(
-      validators.paramsIsObject,
-      validators.pnr
+    AIR_CANCEL_PNR: compose(
+        validate(
+            validators.paramsIsObject,
+            validators.pnr
+        ),
+        transform()
     ),
-    transform()
-  ),
 
-  AIR_EXCHANGE_QUOTE: compose(
-    validate(
-      validators.segments,
-      validators.pnr
+    AIR_EXCHANGE_QUOTE: compose(
+        validate(
+            validators.segments,
+            validators.pnr
+        ),
+        transform()
     ),
-    transform()
-  ),
 
-  AIR_EXCHANGE: compose(
-    validate(
-      validators.pnr,
-      validators.reservationLocator,
-      validators.exchangeToken
+    AIR_EXCHANGE: compose(
+        validate(
+            validators.pnr,
+            validators.reservationLocator,
+            validators.exchangeToken
+        ),
+        transform(
+            transformers.decodeExchangeToken
+        )
     ),
-    transform(
-      transformers.decodeExchangeToken
-    )
-  ),
 };

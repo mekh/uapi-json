@@ -7,381 +7,368 @@ const airService = require('./AirService');
 const createTerminalService = require('../Terminal/Terminal');
 const { AirRuntimeError } = require('./AirErrors');
 const validateServiceSettings = require('../../utils/validate-service-settings');
+const { logger } = require('../../utils/logger');
 
-module.exports = (settings) => {
-  const service = airService(validateServiceSettings(settings));
-  const log = (settings.options && settings.options.logFunction) || console.log;
-  return {
-    shop(options) {
-      if (options.async === true) {
-        return service.searchLowFaresAsync(options);
-      }
-      return service.searchLowFares(options);
-    },
-
-    retrieveShop(options) {
-      return service.searchLowFaresRetrieve(options);
-    },
-
-    availability(options) {
-      return service.availability(options);
-    },
-
-    airPrice(options) {
-      return service.airPrice(options);
-    },
-
-    fareRules(options) {
-      // add request for fare rules
-      const request = {
-        ...options,
-        fetchFareRules: true,
-      };
-
-      return service.lookupFareRules(request);
-    },
-
-    toQueue(options) {
-      return service.gdsQueue(options);
-    },
-
-    book(options) {
-      return service.airPricePricingSolutionXML(options).then((data) => {
-        const tauDate = moment(options.tau || null);
-        const tau = tauDate.isValid() ? tauDate.format() : moment().add(3, 'hours').format();
-        const bookingParams = Object.assign({}, {
-          ticketDate: tau,
-          ActionStatusType: 'TAU',
-        }, data, options);
-        return service.createReservation(bookingParams).catch((err) => {
-          if (err instanceof AirRuntimeError.SegmentBookingFailed
-              || err instanceof AirRuntimeError.NoValidFare) {
-            if (options.allowWaitlist) { // will not have a UR if waitlisting restricted
-              const code = err.data['universal:UniversalRecord'].LocatorCode;
-              return service.cancelUR({
-                LocatorCode: code,
-              }).then(() => Promise.reject(err));
+module.exports = settings => {
+    const service = airService(validateServiceSettings(settings));
+    const log = (settings.options && settings.options.logFunction) || logger;
+    return {
+        shop(options) {
+            if (options.async === true) {
+                return service.searchLowFaresAsync(options);
             }
-            return Promise.reject(err);
-          }
-          return Promise.reject(err);
-        });
-      });
-    },
+            return service.searchLowFares(options);
+        },
 
-    getBooking(options) {
-      return this.getUniversalRecordByPNR(options)
-        .then(
-          ur => getBookingFromUr(ur, options.pnr)
-            || Promise.reject(new AirRuntimeError.NoPNRFoundInUR(ur))
-        )
-        .then((data) => {
-          /*
-            disable tickets from PNR, because this is known bug in uapi,
-            use getTickets(reservationLocatorCode) instead
-           */
-          const { tickets, ...otherData } = data; // eslint-disable-line no-unused-vars
+        retrieveShop(options) {
+            return service.searchLowFaresRetrieve(options);
+        },
 
-          return otherData;
-        });
-    },
+        availability(options) {
+            return service.availability(options);
+        },
 
-    getPNR(options) {
-      console.warn('DEPRECATED, will be dropped in next major version, use getBooking');
-      return this.getBooking(options);
-    },
+        airPrice(options) {
+            return service.airPrice(options);
+        },
 
-    getUniversalRecord(options) {
-      return service.getUniversalRecord(options);
-    },
+        fareRules(options) {
+            // add request for fare rules
+            const request = {
+                ...options,
+                fetchFareRules: true,
+            };
 
-    getUniversalRecordByPNR(options) {
-      return service.getUniversalRecordByPNR(options)
-        .catch((err) => {
-          // Checking for error type
-          if (!(err instanceof AirRuntimeError.NoReservationToImport)) {
-            return Promise.reject(err);
-          }
-          // Creating passive segment to import PNR
-          const terminal = createTerminalService(settings);
-          const segment = {
-            date: moment().add(42, 'days').format('DDMMM'),
-            airline: 'OK',
-            from: 'DOH',
-            to: 'ODM',
-            comment: 'NO1',
-            class: 'Y',
-          };
-          const segmentCommand = (
-            `0${segment.airline}OPEN${segment.class}${segment.date}${segment.from}${segment.to}${segment.comment}`
-          ).toUpperCase();
-          const segmentResult = (
-            `1. ${segment.airline} OPEN ${segment.class}  ${segment.date} ${segment.from}${segment.to} ${segment.comment}`
-          ).toUpperCase();
-          const pnrRegExp = new RegExp(`^(?:\\*\\* THIS BF IS CURRENTLY IN USE \\*\\*\\s*)?${options.pnr}`);
-          return terminal.executeCommand(`*${options.pnr}`)
-            .then((response) => {
-              if (!response.match(pnrRegExp)) {
-                return Promise.reject(new AirRuntimeError.UnableToOpenPNRInTerminal());
-              }
-              return Promise.resolve();
-            })
-            .then(() => terminal.executeCommand(segmentCommand))
-            .then((response) => {
-              if (response.indexOf(segmentResult) === -1) {
-                return Promise.reject(new AirRuntimeError.UnableToAddExtraSegment());
-              }
-              return Promise.resolve();
-            })
-            .then(() => {
-              const ticketingDate = moment().add(10, 'days').format('DDMMM');
-              const command = `T.TAU/${ticketingDate}`;
-              return terminal.executeCommand(command)
-                .then(() => terminal.executeCommand('R.UAPI+ER'))
-                .then(() => terminal.executeCommand('ER'));
-            })
-            .then((response) => {
-              if (
-                (!response.match(pnrRegExp))
-                || (response.indexOf(segmentResult) === -1)
-              ) {
-                return Promise.reject(new AirRuntimeError.UnableToSaveBookingWithExtraSegment());
-              }
-              return Promise.resolve();
-            })
-            .catch(
-              importErr => terminal.closeSession().then(
-                () => Promise.reject(
-                  new AirRuntimeError.UnableToImportPnr(options, importErr)
-                )
-              )
-            )
-            .then(() => terminal.closeSession())
-            .then(() => service.getUniversalRecordByPNR(options))
-            .then(ur => service.cancelBooking(getBookingFromUr(ur, options.pnr)))
-            .then(() => service.getUniversalRecordByPNR(options));
-        });
-    },
+            return service.lookupFareRules(request);
+        },
 
-    ticket(options) {
-      return (options.ReservationLocator
-        ? Promise.resolve(options.ReservationLocator)
-        : this.getBooking(options).then(booking => booking.uapi_reservation_locator)
-      )
-        .then(ReservationLocator => retry({ retries: 3 }, (again, number) => {
-          if (settings.debug && number > 1) {
-            log(`ticket ${options.pnr} issue attempt number ${number}`);
-          }
-          return service.ticket({
-            ...options,
-            ReservationLocator,
-          })
-            .catch((err) => {
-              if (err instanceof AirRuntimeError.TicketingFoidRequired) {
-                return this.getBooking(options)
-                  .then(updatedBooking => service.foid(updatedBooking))
-                  .then(() => again(err));
-              }
-              if (err instanceof AirRuntimeError.TicketingPNRBusy) {
-                return again(err);
-              }
-              return Promise.reject(err);
-            });
-        }));
-    },
+        toQueue(options) {
+            return service.gdsQueue(options);
+        },
 
-    flightInfo(options) {
-      const parameters = {
-        flightInfoCriteria: Array.isArray(options) ? options : [options],
-      };
-      return service.flightInfo(parameters);
-    },
+        book(options) {
+            return service.airPricePricingSolutionXML(options).then(data => {
+                const tauDate = moment(options.tau || null);
+                const tau = tauDate.isValid() ? tauDate.format() : moment().add(3, 'hours').format();
+                const bookingParams = Object.assign({}, {
+                    ticketDate: tau,
+                    ActionStatusType: 'TAU',
+                }, data, options);
 
-    getTicket(options) {
-      return service.getTicket(options)
-        .catch((err) => {
-          if (!(err instanceof AirRuntimeError.TicketInfoIncomplete)
-            && !(err instanceof AirRuntimeError.DuplicateTicketFound)) {
-            return Promise.reject(err);
-          }
-          return this.getPNRByTicketNumber({
-            ticketNumber: options.ticketNumber,
-          })
-            .then(pnr => this.getBooking({ pnr }))
-            .then(booking => service.getTicket({
-              ...options,
-              pnr: booking.pnr,
-              uapi_ur_locator: booking.uapi_ur_locator,
-            }));
-        });
-    },
+                return service.createReservation(bookingParams).catch(err => {
+                    if (
+                        err instanceof AirRuntimeError.SegmentBookingFailed
+                        || err instanceof AirRuntimeError.NoValidFare
+                    ) {
+                        if (options.allowWaitlist) { // will not have a UR if waitlisting restricted
+                            const code = err.data['universal:UniversalRecord'].LocatorCode;
 
-    getTickets(options) {
-      return service.getTickets(options).catch(
-        err => Promise.reject(new AirRuntimeError.UnableToRetrieveTickets(options, err))
-      );
-    },
-
-    getBookingByTicketNumber(options) {
-      const terminal = createTerminalService(settings);
-      return terminal.executeCommand(`*TE/${options.ticketNumber}`)
-        .then(
-          response => terminal.closeSession()
-            .then(() => response.match(/RLOC [^\s]{2} ([^\s]{6})/)[1])
-            .catch(() => Promise.reject(new AirRuntimeError.PnrParseError(response)))
-        )
-        .catch(
-          err => Promise.reject(new AirRuntimeError.GetPnrError(options, err))
-        );
-    },
-
-    getPNRByTicketNumber(options) {
-      console.warn('DEPRECATED, will be dropped in next major version, use getBookingByTicketNumber');
-      return this.getBookingByTicketNumber(options);
-    },
-
-    searchBookingsByPassengerName(options) {
-      const terminal = createTerminalService(settings);
-      return terminal.executeCommand(`*-${options.searchPhrase}`)
-        .then((firstScreen) => {
-          const list = parsers.searchPassengersList(firstScreen);
-          if (list) {
-            return Promise
-              .all(list.map((line) => {
-                const localTerminal = createTerminalService(settings);
-                return localTerminal
-                  .executeCommand(`*-${options.searchPhrase}`)
-                  .then((firstScreenAgain) => {
-                    if (firstScreenAgain !== firstScreen) {
-                      return Promise.reject(
-                        new AirRuntimeError.RequestInconsistency({
-                          firstScreen,
-                          firstScreenAgain,
-                        })
-                      );
+                            return service.cancelUR({ LocatorCode: code })
+                                .then(() => Promise.reject(err));
+                        }
                     }
 
-                    return localTerminal.executeCommand(`*${line.id}`);
-                  })
-                  .then(parsers.bookingPnr)
-                  .then((pnr) => {
-                    return localTerminal.closeSession()
-                      .then(() => ({ ...line, pnr }));
-                  });
-              }))
-              .then(data => ({ type: 'list', data }));
-          }
+                    return Promise.reject(err);
+                });
+            });
+        },
 
-          const pnr = parsers.bookingPnr(firstScreen);
-          if (pnr) {
-            return {
-              type: 'pnr',
-              data: pnr,
-            };
-          }
+        getBooking(options) {
+            return this.getUniversalRecordByPNR(options)
+                .then(ur => getBookingFromUr(ur, options.pnr) || Promise.reject(new AirRuntimeError.NoPNRFoundInUR(ur)))
+                .then(data => {
+                    /*
+                    disable tickets from PNR, because this is known bug in uapi,
+                    use getTickets(reservationLocatorCode) instead
+                   */
+                    const { tickets, ...otherData } = data; // eslint-disable-line no-unused-vars
 
-          return Promise.reject(
-            new AirRuntimeError.MissingPaxListAndBooking(firstScreen)
-          );
-        })
-        .then(results => terminal.closeSession()
-          .then(() => results)
-          .catch(() => results));
-    },
+                    return otherData;
+                });
+        },
 
-    cancelTicket(options) {
-      return this.getTicket(options)
-        .then(
-          ticketData => service.cancelTicket({
-            pnr: ticketData.pnr,
-            ticketNumber: options.ticketNumber,
-          })
-        )
-        .catch(
-          err => Promise.reject(new AirRuntimeError.FailedToCancelTicket(options, err))
-        );
-    },
+        getPNR(options) {
+            log.warn('DEPRECATED, will be dropped in next major version, use getBooking');
+            return this.getBooking(options);
+        },
 
-    cancelBooking(options) {
-      const ignoreTickets = typeof options.ignoreTickets === 'undefined'
-        ? false // default value
-        : options.ignoreTickets;
+        getUniversalRecord(options) {
+            return service.getUniversalRecord(options);
+        },
 
-      const checkTickets = (tickets) => {
-        return Promise.all(tickets.map(
-          (ticketData) => {
-            // Check for VOID or REFUND
-            const allTicketsVoidOrRefund = ticketData.tickets.every(
-              ticket => ticket.coupons.every(
-                coupon => coupon.status === 'V' || coupon.status === 'R'
-              )
-            );
-            if (allTicketsVoidOrRefund) {
-              return Promise.resolve(true);
-            }
-            // Check for cancelTicket option
-            if (options.cancelTickets !== true) {
-              return Promise.reject(new AirRuntimeError.PNRHasOpenTickets());
-            }
-            // Check for not OPEN/VOID segments
-            const hasNotOpenSegment = ticketData.tickets.some(
-              ticket => ticket.coupons.some(
-                coupon => 'OV'.indexOf(coupon.status) === -1
-              )
-            );
-            if (hasNotOpenSegment) {
-              return Promise.reject(new AirRuntimeError.UnableToCancelTicketStatusNotOpen());
-            }
-            return Promise.all(
-              ticketData.tickets.map(
-                ticket => (
-                  ticket.coupons[0].status !== 'V'
-                    ? service.cancelTicket({
-                      pnr: options.pnr,
-                      ticketNumber: ticket.ticketNumber,
+        getUniversalRecordByPNR(options) {
+            return service.getUniversalRecordByPNR(options)
+                .catch(err => {
+                    // Checking for error type
+                    if (!(err instanceof AirRuntimeError.NoReservationToImport)) {
+                        return Promise.reject(err);
+                    }
+                    // Creating passive segment to import PNR
+                    const terminal = createTerminalService(settings);
+                    const segment = {
+                        date: moment().add(42, 'days').format('DDMMM'),
+                        airline: 'OK',
+                        from: 'DOH',
+                        to: 'ODM',
+                        comment: 'NO1',
+                        class: 'Y',
+                    };
+
+                    const {
+                        airline,
+                        class: sClass,
+                        date,
+                        from,
+                        to,
+                        comment
+                    } = segment;
+
+                    const segmentCommand = (
+                        `0${airline}OPEN${sClass}${date}${from}${to}${comment}`
+                    ).toUpperCase();
+
+                    const segmentResult = (
+                        `1. ${airline} OPEN ${sClass}  ${date} ${from}${to} ${comment}`
+                    ).toUpperCase();
+
+                    const pnrRegExp = new RegExp(`^(?:\\*\\* THIS BF IS CURRENTLY IN USE \\*\\*\\s*)?${options.pnr}`);
+
+                    return terminal.executeCommand(`*${options.pnr}`)
+                        .then(response => {
+                            if (!response.match(pnrRegExp)) {
+                                return Promise.reject(new AirRuntimeError.UnableToOpenPNRInTerminal());
+                            }
+                            return Promise.resolve();
+                        })
+                        .then(() => terminal.executeCommand(segmentCommand))
+                        .then(response => {
+                            if (response.indexOf(segmentResult) === -1) {
+                                return Promise.reject(new AirRuntimeError.UnableToAddExtraSegment());
+                            }
+                            return Promise.resolve();
+                        })
+                        .then(() => {
+                            const ticketingDate = moment().add(10, 'days').format('DDMMM');
+                            const command = `T.TAU/${ticketingDate}`;
+                            return terminal.executeCommand(command)
+                                .then(() => terminal.executeCommand('R.UAPI+ER'))
+                                .then(() => terminal.executeCommand('ER'));
+                        })
+                        .then(response => {
+                            if (!response.match(pnrRegExp) || response.indexOf(segmentResult) === -1) {
+                                return Promise.reject(new AirRuntimeError.UnableToSaveBookingWithExtraSegment());
+                            }
+                            return Promise.resolve();
+                        })
+                        .catch(
+                            importErr => terminal.closeSession().then(
+                                () => Promise.reject(
+                                    new AirRuntimeError.UnableToImportPnr(options, importErr)
+                                )
+                            )
+                        )
+                        .then(() => terminal.closeSession())
+                        .then(() => service.getUniversalRecordByPNR(options))
+                        .then(ur => service.cancelBooking(getBookingFromUr(ur, options.pnr)))
+                        .then(() => service.getUniversalRecordByPNR(options));
+                });
+        },
+
+        ticket(options) {
+            return (options.ReservationLocator
+                ? Promise.resolve(options.ReservationLocator)
+                : this.getBooking(options).then(booking => booking.uapi_reservation_locator)
+            )
+                .then(ReservationLocator => retry({ retries: 3 }, (again, number) => {
+                    if (settings.debug && number > 1) {
+                        log.debug(`ticket ${options.pnr} issue attempt number ${number}`);
+                    }
+                    return service.ticket({
+                        ...options,
+                        ReservationLocator,
                     })
-                    : Promise.resolve(true)
-                )
-              )
+                        .catch(err => {
+                            if (err instanceof AirRuntimeError.TicketingFoidRequired) {
+                                return this.getBooking(options)
+                                    .then(updatedBooking => service.foid(updatedBooking))
+                                    .then(() => again(err));
+                            }
+                            if (err instanceof AirRuntimeError.TicketingPNRBusy) {
+                                return again(err);
+                            }
+                            return Promise.reject(err);
+                        });
+                }));
+        },
+
+        flightInfo(options) {
+            const parameters = {
+                flightInfoCriteria: Array.isArray(options) ? options : [options],
+            };
+            return service.flightInfo(parameters);
+        },
+
+        getTicket(options) {
+            return service.getTicket(options)
+                .catch(err => {
+                    if (!(
+                        err instanceof AirRuntimeError.TicketInfoIncomplete
+                        || err instanceof AirRuntimeError.DuplicateTicketFound
+                    )) {
+                        return Promise.reject(err);
+                    }
+
+                    return this.getPNRByTicketNumber({ ticketNumber: options.ticketNumber })
+                        .then(pnr => this.getBooking({ pnr }))
+                        .then(booking => service.getTicket({
+                            ...options,
+                            pnr: booking.pnr,
+                            uapi_ur_locator: booking.uapi_ur_locator,
+                        }));
+                });
+        },
+
+        getTickets(options) {
+            return service.getTickets(options).catch(
+                err => Promise.reject(new AirRuntimeError.UnableToRetrieveTickets(options, err))
             );
-          }
-        ));
-      };
+        },
 
-      return this.getUniversalRecordByPNR(options)
-        .then((ur) => {
-          const record = Array.isArray(ur) ? ur[0] : ur;
-          return (ignoreTickets
-            ? Promise.resolve([])
-            : this.getTickets(record).then(checkTickets)
-          )
-            .then(() => this.getBooking(options))
-            .then(booking => service.cancelBooking(booking))
-            .catch(
-              err => Promise.reject(new AirRuntimeError.FailedToCancelPnr(options, err))
-            );
-        });
-    },
+        getBookingByTicketNumber(options) {
+            const terminal = createTerminalService(settings);
+            return terminal.executeCommand(`*TE/${options.ticketNumber}`)
+                .then(response => terminal.closeSession()
+                    .then(() => response.match(/RLOC [^\s]{2} ([^\s]{6})/)[1])
+                    .catch(() => Promise.reject(new AirRuntimeError.PnrParseError(response))))
+                .catch(err => Promise.reject(new AirRuntimeError.GetPnrError(options, err)));
+        },
 
-    cancelPNR(options) {
-      console.warn('DEPRECATED, will be dropped in next major version, use cancelBooking');
-      return this.cancelBooking(options);
-    },
+        getPNRByTicketNumber(options) {
+            log.warn('DEPRECATED, will be dropped in next major version, use getBookingByTicketNumber');
+            return this.getBookingByTicketNumber(options);
+        },
 
-    getExchangeInformation(options) {
-      return this.getBooking(options)
-        .then(booking => service.exchangeQuote({
-          ...options,
-          bookingDate: moment(booking.createdAt).format('YYYY-MM-DD'),
-        }));
-    },
+        searchBookingsByPassengerName(options) {
+            const terminal = createTerminalService(settings);
+            return terminal.executeCommand(`*-${options.searchPhrase}`)
+                .then(firstScreen => {
+                    const list = parsers.searchPassengersList(firstScreen);
+                    if (list) {
+                        return Promise.all(list.map(line => {
+                            const localTerminal = createTerminalService(settings);
+                            return localTerminal
+                                .executeCommand(`*-${options.searchPhrase}`)
+                                .then((firstScreenAgain) => {
+                                    if (firstScreenAgain !== firstScreen) {
+                                        return Promise.reject(
+                                            new AirRuntimeError.RequestInconsistency({
+                                                firstScreen,
+                                                firstScreenAgain,
+                                            })
+                                        );
+                                    }
 
-    exchangeBooking(options) {
-      return this.getBooking(options)
-        .then(booking => service.exchangeBooking({
-          ...options,
-          uapi_reservation_locator: booking.uapi_reservation_locator,
-        }));
-    },
-  };
+                                    return localTerminal.executeCommand(`*${line.id}`);
+                                })
+                                .then(parsers.bookingPnr)
+                                .then(pnr => {
+                                    return localTerminal.closeSession()
+                                        .then(() => ({ ...line, pnr }));
+                                });
+                        }))
+                            .then(data => ({ type: 'list', data }));
+                    }
+
+                    const pnr = parsers.bookingPnr(firstScreen);
+                    return pnr
+                        ? { type: 'pnr', data: pnr }
+                        : Promise.reject(new AirRuntimeError.MissingPaxListAndBooking(firstScreen));
+                })
+                .then(results => terminal.closeSession()
+                    .then(() => results)
+                    .catch(() => results));
+        },
+
+        cancelTicket(options) {
+            return this.getTicket(options)
+                .then(ticketData => service.cancelTicket({
+                    pnr: ticketData.pnr,
+                    ticketNumber: options.ticketNumber,
+                }))
+                .catch(err => Promise.reject(new AirRuntimeError.FailedToCancelTicket(options, err)));
+        },
+
+        cancelBooking(options) {
+            const ignoreTickets = typeof options.ignoreTickets === 'undefined'
+                ? false // default value
+                : options.ignoreTickets;
+
+            const checkTickets = tickets => {
+                return Promise.all(tickets.map(ticketData => {
+                    // Check for VOID or REFUND
+                    const allTicketsVoidOrRefund = ticketData.tickets.every(
+                        ticket => ticket.coupons.every(
+                            coupon => coupon.status === 'V' || coupon.status === 'R'
+                        )
+                    );
+                    if (allTicketsVoidOrRefund) {
+                        return Promise.resolve(true);
+                    }
+                    // Check for cancelTicket option
+                    if (options.cancelTickets !== true) {
+                        return Promise.reject(new AirRuntimeError.PNRHasOpenTickets());
+                    }
+                    // Check for not OPEN/VOID segments
+                    const hasNotOpenSegment = ticketData.tickets.some(
+                        ticket => ticket.coupons.some(
+                            coupon => 'OV'.indexOf(coupon.status) === -1
+                        )
+                    );
+                    if (hasNotOpenSegment) {
+                        return Promise.reject(new AirRuntimeError.UnableToCancelTicketStatusNotOpen());
+                    }
+                    return Promise.all(
+                        ticketData.tickets.map(ticket => (
+                            ticket.coupons[0].status !== 'V'
+                                ? service.cancelTicket({
+                                    pnr: options.pnr,
+                                    ticketNumber: ticket.ticketNumber,
+                                })
+                                : Promise.resolve(true)
+                        ))
+                    );
+                }));
+            };
+
+            return this.getUniversalRecordByPNR(options)
+                .then(ur => {
+                    const record = Array.isArray(ur) ? ur[0] : ur;
+                    return (ignoreTickets ? Promise.resolve([]) : this.getTickets(record).then(checkTickets))
+                        .then(() => this.getBooking(options))
+                        .then(booking => service.cancelBooking(booking))
+                        .catch(err => Promise.reject(new AirRuntimeError.FailedToCancelPnr(options, err)));
+                });
+        },
+
+        cancelPNR(options) {
+            log.warn('DEPRECATED, will be dropped in next major version, use cancelBooking');
+            return this.cancelBooking(options);
+        },
+
+        getExchangeInformation(options) {
+            return this.getBooking(options)
+                .then(booking => service.exchangeQuote({
+                    ...options,
+                    bookingDate: moment(booking.createdAt).format('YYYY-MM-DD'),
+                }));
+        },
+
+        exchangeBooking(options) {
+            return this.getBooking(options)
+                .then(booking => service.exchangeBooking({
+                    ...options,
+                    uapi_reservation_locator: booking.uapi_reservation_locator,
+                }));
+        },
+    };
 };

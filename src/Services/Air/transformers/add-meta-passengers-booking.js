@@ -1,41 +1,44 @@
 const moment = require('moment');
 
-module.exports = (params) => {
-  params.passengers.forEach((item) => {
-    const birthSSR = moment(item.birthDate.toUpperCase(), 'YYYY-MM-DD');
-    const {
-      passCountry: country,
-      passNumber: num,
-      firstName: first,
-      lastName: last,
-      gender
-    } = item;
+module.exports = params => {
+    const result = { ...params };
+    result.passengers = result.passengers.map(item => {
+        const passenger = { ...item };
+        const birthSSR = moment(passenger.birthDate.toUpperCase(), 'YYYY-MM-DD');
+        const {
+            passCountry: country,
+            passNumber: num,
+            firstName: first,
+            lastName: last,
+            gender
+        } = passenger;
 
-    const due = moment().add(12, 'month').format('DDMMMYY');
-    const birth = birthSSR.format('DDMMMYY');
+        const due = moment().add(12, 'month').format('DDMMMYY');
+        const birth = birthSSR.format('DDMMMYY');
 
-    if (item.ageCategory === 'CNN') {
-      item.isChild = true;
-      if (item.Age < 10) {
-        item.ageCategory = `C0${item.Age}`;
-      } else {
-        item.ageCategory = `C${item.Age}`;
-      }
-    }
+        if (passenger.ageCategory === 'CNN') {
+            passenger.isChild = true;
+            if (passenger.Age < 10) {
+                passenger.ageCategory = `C0${passenger.Age}`;
+            } else {
+                passenger.ageCategory = `C${passenger.Age}`;
+            }
+        }
 
-    item.ssr = item.ssr || [];
+        passenger.ssr = passenger.ssr || [];
 
-    item.ssr.push({
-      type: 'FOID',
-      text: `PP${country}${num}`,
+        passenger.ssr.push({
+            type: 'FOID',
+            text: `PP${country}${num}`,
+        });
+        passenger.ssr.push({
+            type: 'DOCS',
+            text: `P/${country}/${num}/${country}/${birth}/${gender}/${due}/${last}/${first}`,
+        });
+
+        passenger.DOB = birthSSR.format('YYYY-MM-DD');
+        return passenger;
     });
-    item.ssr.push({
-      type: 'DOCS',
-      text: `P/${country}/${num}/${country}/${birth}/${gender}/${due}/${last}/${first}`,
-    });
 
-    item.DOB = birthSSR.format('YYYY-MM-DD');
-  });
-
-  return params;
+    return result;
 };

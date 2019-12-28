@@ -9,13 +9,13 @@ const decodeExchangeToken = require('./decode-exchange-token');
 const fixCardFop = require('./fix-card-fop');
 
 module.exports = {
-  convertPassengersObjectToArray,
-  setBusinessFlag,
-  setPassengersAge,
-  setHasFareBasisFlag,
-  setGroupsForSegments,
-  addMetaPassengersBooking,
-  setSegmentRefForSSR,
-  decodeExchangeToken,
-  fixCardFop,
+    convertPassengersObjectToArray,
+    setBusinessFlag,
+    setPassengersAge,
+    setHasFareBasisFlag,
+    setGroupsForSegments,
+    addMetaPassengersBooking,
+    setSegmentRefForSSR,
+    decodeExchangeToken,
+    fixCardFop,
 };

@@ -11,19 +11,19 @@ const terminalErrors = require('./Services/Terminal/TerminalErrors');
 const errorCodes = require('./error-codes.js');
 
 const uAPI = {
-  createUtilsService,
-  createHotelService,
-  createAirService,
-  createTerminalService,
-  errors: {
-    Common: commonErrors,
-    Request: requestErrors,
-    Air: airErrors,
-    Hotels: hotelsErrors,
-    Utils: utilsErrors,
-    Terminal: terminalErrors,
-  },
-  errorCodes,
+    createUtilsService,
+    createHotelService,
+    createAirService,
+    createTerminalService,
+    errors: {
+        Common: commonErrors,
+        Request: requestErrors,
+        Air: airErrors,
+        Hotels: hotelsErrors,
+        Utils: utilsErrors,
+        Terminal: terminalErrors,
+    },
+    errorCodes,
 };
 
 module.exports = uAPI;

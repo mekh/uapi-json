@@ -5,9 +5,9 @@ const search = require('./HOTELS_SEARCH_REQUEST.handlebars');
 const universalRecordCancelUR = require('./UNIVERSAL_RECORD_CANCEL_UR.handlebars');
 
 module.exports = {
-  book,
-  rate,
-  searchGalielo,
-  search,
-  universalRecordCancelUR,
+    book,
+    rate,
+    searchGalielo,
+    search,
+    universalRecordCancelUR,
 };
