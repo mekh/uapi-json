@@ -25,11 +25,11 @@ function getTaxInfo(details = {}) {
                         taxDetail => ({
                             airport: taxDetail.OriginAirport,
                             value: taxDetail.Amount,
-                        })
+                        }),
                     ),
                 }
-                : null
-        )
+                : null,
+        ),
     );
 }
 
@@ -42,7 +42,7 @@ const parseFareCalculation = str => {
         },
         roe
             ? { roe: roe[1] }
-            : null
+            : null,
     );
 };
 
@@ -221,7 +221,7 @@ function airPrice(obj) {
         const solutions = priceKeys.map(key => pricingSolutions[key]);
 
         [pricingSolution] = solutions.sort(
-            (a, b) => parseFloat(a.TotalPrice.slice(3)) - parseFloat(b.TotalPrice.slice(3))
+            (a, b) => parseFloat(a.TotalPrice.slice(3)) - parseFloat(b.TotalPrice.slice(3)),
         );
     } else {
         pricingSolution = pricingSolutions[priceKeys[0]];
@@ -265,7 +265,7 @@ function airPrice(obj) {
                     bookingClass: bookingInfo.BookingCode,
                     fareBasisCode: fareInfo.FareBasis,
                     baggage,
-                }
+                },
             );
         });
 
@@ -325,7 +325,7 @@ function airPriceRspPricingSolutionXML(obj) {
         // TODO: Check result for multiple passenger type results.
         log.info('More than one solution found in booking. Resolving the cheapest one.');
         [pricingSolution] = pricingSolutions.sort(
-            (a, b) => parseFloat(a.$.TotalPrice.slice(3)) - parseFloat(b.$.TotalPrice.slice(3))
+            (a, b) => parseFloat(a.$.TotalPrice.slice(3)) - parseFloat(b.$.TotalPrice.slice(3)),
         );
     } else {
         [pricingSolution] = pricingSolutions;
@@ -341,7 +341,7 @@ function airPriceRspPricingSolutionXML(obj) {
 
     // delete existing air passenger types for each fare (map stored in passengersPerReservations)
     const pricingInfos = pricingSolution['air:AirPricingInfo'].map(
-        info => Object.assign({}, info, { 'air:PassengerType': [] })
+        info => Object.assign({}, info, { 'air:PassengerType': [] }),
     );
 
     this.env.passengers.forEach((passenger, index) => {
@@ -433,8 +433,7 @@ const AirErrorHandler = function (rsp) {
         })(),
         2602: new AirRuntimeError.NoResultsFound(rsp),
         3037: new AirRuntimeError.NoResultsFound(rsp),
-        undefined: new RequestRuntimeError.UnhandledError(null, new AirRuntimeError(rsp)),
-    }[code];
+    }[code] || new RequestRuntimeError.UnhandledError(null, new AirRuntimeError(rsp));
 };
 
 function getTicketFromEtr(etr, obj) {
@@ -453,7 +452,7 @@ function getTicketFromEtr(etr, obj) {
             const lastName = travelerDetails.Last;
 
             return { firstName, lastName };
-        }
+        },
     );
 
     const airPricingInfo = etr['air:AirPricingInfo']
@@ -488,7 +487,7 @@ function getTicketFromEtr(etr, obj) {
     const tickets = ticketsList.map(ticket => {
         if (ticket['air:ExchangedTicketInfo']) {
             ticket['air:ExchangedTicketInfo'].forEach(
-                t => exchangedTickets.push(t.Number)
+                t => exchangedTickets.push(t.Number),
             );
         }
 
@@ -519,7 +518,7 @@ function getTicketFromEtr(etr, obj) {
                         ? nextCoupon.stopover
                         : true
                 ),
-                ...(bkInfo !== null ? { serviceClass: bkInfo.CabinClass } : null)
+                ...(bkInfo !== null ? { serviceClass: bkInfo.CabinClass } : null),
             };
         });
 
@@ -541,10 +540,10 @@ function getTicketFromEtr(etr, obj) {
                         taxDetail => ({
                             airport: taxDetail.OriginAirport,
                             value: taxDetail.Amount,
-                        })
+                        }),
                     ),
                 }
-                : null
+                : null,
         ))
         : [];
     const priceSource = airPricingInfo || etr;
@@ -597,7 +596,7 @@ function getTicketFromEtr(etr, obj) {
             : null,
         exchangedTickets.length > 0
             ? { exchangedTickets }
-            : null
+            : null,
     );
 }
 
@@ -681,7 +680,7 @@ function airCancelPnr(obj) {
     const messages = obj[`common_${this.uapi_version}:ResponseMessage`] || [];
     if (
         messages.some(
-            message => message._ === 'Itinerary Cancelled'
+            message => message._ === 'Itinerary Cancelled',
         )
     ) {
         return true;
@@ -724,7 +723,7 @@ function extractBookings(obj) {
                     acc,
                     {
                         [reservationRef]: (acc[reservationRef] || []).concat(remarksObj[key]),
-                    }
+                    },
                 );
             },
             {})
@@ -791,7 +790,7 @@ function extractBookings(obj) {
                 } : null,
                 traveler.Gender ? {
                     gender: traveler.Gender,
-                } : null
+                } : null,
             );
         });
 
@@ -800,7 +799,7 @@ function extractBookings(obj) {
             serviceSegments: indexedServiceSegments,
         } = format.setIndexesForSegments(
             booking['air:AirSegment'] || null,
-            (passiveReservation && passiveReservation['passive:PassiveSegment']) || null
+            (passiveReservation && passiveReservation['passive:PassiveSegment']) || null,
         );
 
         const supplierLocator = booking[`common_${this.uapi_version}:SupplierLocator`] || [];
@@ -817,7 +816,7 @@ function extractBookings(obj) {
         const serviceSegments = indexedServiceSegments
             ? indexedServiceSegments.map(s => {
                 const remark = passiveReservation['passive:PassiveRemark'].find(
-                    r => r.PassiveSegmentRef === s.Key
+                    r => r.PassiveSegmentRef === s.Key,
                 );
 
                 try {
@@ -851,7 +850,7 @@ function extractBookings(obj) {
                 const pricingInfo = booking['air:AirPricingInfo'][key];
 
                 const uapiSegmentRefs = (pricingInfo['air:BookingInfo'] || []).map(
-                    segment => segment.SegmentRef
+                    segment => segment.SegmentRef,
                 );
 
                 const uapiPassengerRefs = pricingInfo[`common_${this.uapi_version}:BookingTravelerRef`];
@@ -859,7 +858,7 @@ function extractBookings(obj) {
                 const fareInfo = pricingInfo['air:FareInfo'];
 
                 const baggage = fareInfo && Object.values(fareInfo).map(
-                    fareLeg => format.getBaggage(fareLeg['air:BaggageAllowance'])
+                    fareLeg => format.getBaggage(fareLeg['air:BaggageAllowance']),
                 );
 
                 const passengersCount = (pricingInfo['air:PassengerType'] || [])
@@ -896,12 +895,12 @@ function extractBookings(obj) {
                     },
                     platingCarrier
                         ? { platingCarrier }
-                        : null
+                        : null,
                 );
 
                 const pricingInfoPassengers = (uapiPassengerRefs || []).map(ref => {
                     const ticket = tickets.find(
-                        t => t.uapi_passenger_ref === ref && t.uapi_pricing_info_ref === key
+                        t => t.uapi_passenger_ref === ref && t.uapi_pricing_info_ref === key,
                     );
                     return Object.assign(
                         {
@@ -910,7 +909,7 @@ function extractBookings(obj) {
                         },
                         ticket
                             ? { ticketNumber: ticket.number }
-                            : null
+                            : null,
                     );
                 });
 
@@ -930,7 +929,7 @@ function extractBookings(obj) {
                         baggage,
                         timeToReprice: pricingInfo.LatestTicketingTime,
                     },
-                    parseFareCalculation(pricingInfo['air:FareCalc'])
+                    parseFareCalculation(pricingInfo['air:FareCalc']),
                 );
             }).filter(Boolean);
 
@@ -938,16 +937,16 @@ function extractBookings(obj) {
             (acc, pricingInfo) => Object.assign(acc, {
                 [pricingInfo.uapi_pricing_info_group]: (acc[pricingInfo.uapi_pricing_info_group] || [])
                     .concat(pricingInfo),
-            }), {}
+            }), {},
         );
 
         const fareQuotes = Object.keys(fareQuotesGrouped).map(key => {
             const fqGroup = fareQuotesGrouped[key];
             const fqGroupPassengers = fqGroup.reduce(
                 (acc, fq) => acc.concat(
-                    fq.passengers.map(p => p.uapi_passenger_ref)
+                    fq.passengers.map(p => p.uapi_passenger_ref),
                 ),
-                []
+                [],
             );
 
             return {
@@ -956,9 +955,9 @@ function extractBookings(obj) {
                 ...fareQuotesCommon[key],
             };
         }).sort(
-            (fq1, fq2) => moment(fq1.effectiveDate) - moment(fq2.effectiveDate)
+            (fq1, fq2) => moment(fq1.effectiveDate) - moment(fq2.effectiveDate),
         ).map(
-            (fq, index) => ({ ...fq, index: index + 1 })
+            (fq, index) => ({ ...fq, index: index + 1 }),
         );
 
         return Object.assign(
@@ -987,7 +986,7 @@ function extractBookings(obj) {
             splitBookings.length > 0
                 ? { splitBookings }
                 : null,
-            responseMessage ? { messages: responseMessage } : null
+            responseMessage ? { messages: responseMessage } : null,
         );
     });
 }
@@ -1114,7 +1113,7 @@ function exchangeQuote(req) {
                             bookingInfo,
                             uapi_pricing_info_ref: pricing.Key,
                         },
-                        parseFareCalculation(pricing['air:FareCalc'])
+                        parseFareCalculation(pricing['air:FareCalc']),
                     );
                 });
 
@@ -1156,7 +1155,7 @@ function availability(rsp) {
 
     const connectedSegments = itinerarySolution['air:Connection']
         ? itinerarySolution['air:Connection'].map(
-            s => parseInt(s.SegmentIndex, 10)
+            s => parseInt(s.SegmentIndex, 10),
         )
         : [];
 

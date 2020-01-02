@@ -120,7 +120,7 @@ module.exports = settings => {
                         date,
                         from,
                         to,
-                        comment
+                        comment,
                     } = segment;
 
                     const segmentCommand = (
@@ -163,9 +163,9 @@ module.exports = settings => {
                         .catch(
                             importErr => terminal.closeSession().then(
                                 () => Promise.reject(
-                                    new AirRuntimeError.UnableToImportPnr(options, importErr)
-                                )
-                            )
+                                    new AirRuntimeError.UnableToImportPnr(options, importErr),
+                                ),
+                            ),
                         )
                         .then(() => terminal.closeSession())
                         .then(() => service.getUniversalRecordByPNR(options))
@@ -230,7 +230,7 @@ module.exports = settings => {
 
         getTickets(options) {
             return service.getTickets(options).catch(
-                err => Promise.reject(new AirRuntimeError.UnableToRetrieveTickets(options, err))
+                err => Promise.reject(new AirRuntimeError.UnableToRetrieveTickets(options, err)),
             );
         },
 
@@ -264,7 +264,7 @@ module.exports = settings => {
                                             new AirRuntimeError.RequestInconsistency({
                                                 firstScreen,
                                                 firstScreenAgain,
-                                            })
+                                            }),
                                         );
                                     }
 
@@ -308,8 +308,8 @@ module.exports = settings => {
                     // Check for VOID or REFUND
                     const allTicketsVoidOrRefund = ticketData.tickets.every(
                         ticket => ticket.coupons.every(
-                            coupon => coupon.status === 'V' || coupon.status === 'R'
-                        )
+                            coupon => coupon.status === 'V' || coupon.status === 'R',
+                        ),
                     );
                     if (allTicketsVoidOrRefund) {
                         return Promise.resolve(true);
@@ -321,8 +321,8 @@ module.exports = settings => {
                     // Check for not OPEN/VOID segments
                     const hasNotOpenSegment = ticketData.tickets.some(
                         ticket => ticket.coupons.some(
-                            coupon => 'OV'.indexOf(coupon.status) === -1
-                        )
+                            coupon => 'OV'.indexOf(coupon.status) === -1,
+                        ),
                     );
                     if (hasNotOpenSegment) {
                         return Promise.reject(new AirRuntimeError.UnableToCancelTicketStatusNotOpen());
@@ -335,7 +335,7 @@ module.exports = settings => {
                                     ticketNumber: ticket.ticketNumber,
                                 })
                                 : Promise.resolve(true)
-                        ))
+                        )),
                     );
                 }));
             };

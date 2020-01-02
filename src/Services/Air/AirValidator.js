@@ -6,59 +6,59 @@ module.exports = {
     AIR_LOW_FARE_SEARCH_REQUEST: compose(
         validate(
             validators.passengers,
-            validators.legs
+            validators.legs,
         ),
         transform(
-            transformers.convertPassengersObjectToArray
-        )
+            transformers.convertPassengersObjectToArray,
+        ),
     ),
 
     AIR_RETRIEVE_LOW_FARE_SEARCH_REQUEST: compose(
         validate(
-            validators.searchId
+            validators.searchId,
         ),
-        transform()
+        transform(),
     ),
 
     AIR_PRICE_FARE_RULES_REQUEST: compose(
         validate(
             validators.segments,
             validators.passengers,
-            validators.platingCarrier
+            validators.platingCarrier,
         ),
         transform(
             transformers.setBusinessFlag,
             // transformers.setGroupsForSegments, <air:Connection/> hack fails validation on pre-prod
             transformers.setHasFareBasisFlag,
-            transformers.convertPassengersObjectToArray
-        )
+            transformers.convertPassengersObjectToArray,
+        ),
     ),
 
     AIR_PRICE_REQUEST: compose(
         validate(
             validators.segments,
             validators.passengers,
-            validators.platingCarrier
+            validators.platingCarrier,
         ),
         transform(
             transformers.setBusinessFlag,
             transformers.convertPassengersObjectToArray,
             transformers.setGroupsForSegments,
-            transformers.setHasFareBasisFlag
-        )
+            transformers.setHasFareBasisFlag,
+        ),
     ),
 
     AIR_PRICE: compose(
         validate(
             validators.segments,
-            validators.platingCarrier
+            validators.platingCarrier,
         ),
         transform(
             transformers.setBusinessFlag,
             transformers.setPassengersAge,
             transformers.setGroupsForSegments,
-            transformers.setHasFareBasisFlag
-        )
+            transformers.setHasFareBasisFlag,
+        ),
     ),
 
     AIR_CREATE_RESERVATION_REQUEST: compose(
@@ -66,13 +66,13 @@ module.exports = {
             validators.emailOptional,
             validators.phone,
             validators.deliveryInfoOptional,
-            validators.pricingSolutionXml
+            validators.pricingSolutionXml,
         ),
         transform(
             transformers.setPassengersAge,
             transformers.addMetaPassengersBooking,
-            transformers.setSegmentRefForSSR
-        )
+            transformers.setSegmentRefForSSR,
+        ),
     ),
 
     AIR_TICKET: compose(
@@ -80,34 +80,34 @@ module.exports = {
             validators.paramsIsObject,
             validators.fop,
             validators.fopCreditCard,
-            validators.pnr
+            validators.pnr,
         ),
         transform(
-            transformers.fixCardFop
-        )
+            transformers.fixCardFop,
+        ),
     ),
 
     AIR_REQUEST_BY_PNR: compose(
         validate(
-            validators.pnr
+            validators.pnr,
         ),
-        transform()
+        transform(),
     ),
 
     GDS_QUEUE_PLACE: compose(
         validate(
             validators.pnr,
             validators.pcc,
-            validators.queue
+            validators.queue,
         ),
-        transform()
+        transform(),
     ),
 
     UNIVERSAL_RECORD_RETRIEVE: compose(
         validate(
-            validators.universalRecordLocator
+            validators.universalRecordLocator,
         ),
-        transform()
+        transform(),
     ),
 
     AIR_CANCEL_UR: params => params,
@@ -115,60 +115,60 @@ module.exports = {
 
     AIR_FLIGHT_INFORMATION: compose(
         validate(
-            validators.flightInfo
+            validators.flightInfo,
         ),
-        transform()
+        transform(),
     ),
 
     AIR_GET_TICKET: compose(
         validate(
             validators.paramsIsObject,
-            validators.ticketNumber
+            validators.ticketNumber,
         ),
-        transform()
+        transform(),
     ),
 
     AIR_GET_TICKETS: compose(
         validate(
             validators.paramsIsObject,
-            validators.reservationLocator
+            validators.reservationLocator,
         ),
-        transform()
+        transform(),
     ),
 
     AIR_CANCEL_TICKET: compose(
         validate(
             validators.paramsIsObject,
             validators.pnr,
-            validators.ticketNumber
+            validators.ticketNumber,
         ),
-        transform()
+        transform(),
     ),
 
     AIR_CANCEL_PNR: compose(
         validate(
             validators.paramsIsObject,
-            validators.pnr
+            validators.pnr,
         ),
-        transform()
+        transform(),
     ),
 
     AIR_EXCHANGE_QUOTE: compose(
         validate(
             validators.segments,
-            validators.pnr
+            validators.pnr,
         ),
-        transform()
+        transform(),
     ),
 
     AIR_EXCHANGE: compose(
         validate(
             validators.pnr,
             validators.reservationLocator,
-            validators.exchangeToken
+            validators.exchangeToken,
         ),
         transform(
-            transformers.decodeExchangeToken
-        )
+            transformers.decodeExchangeToken,
+        ),
     ),
 };

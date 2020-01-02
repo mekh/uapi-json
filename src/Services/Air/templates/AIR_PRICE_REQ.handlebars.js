@@ -1,7 +1,4 @@
-module.exports = `
-<!--Release 8.1-->
-<!--Version Dated as of 15/Apr/2015 11:24:06-->
-<!--Air Pricing For Galileo({{provider}}) with LFS CheckFlightDetails Request-->
+module.exports = uapiVersion => `
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Header/>
     <soap:Body>
@@ -11,9 +8,9 @@ module.exports = `
             {{#if fetchFareRules}}
             FareRuleType="{{#if long}}long{{else}}short{{/if}}"
             {{/if}}
-            xmlns:air="http://www.travelport.com/schema/air_v47_0"
-            xmlns:com="http://www.travelport.com/schema/common_v47_0">
-            <com:BillingPointOfSaleInfo OriginApplication="UAPI" xmlns:com="http://www.travelport.com/schema/common_v47_0"/>
+            xmlns:air="http://www.travelport.com/schema/air_${uapiVersion}"
+            xmlns:com="http://www.travelport.com/schema/common_${uapiVersion}">
+            <com:BillingPointOfSaleInfo OriginApplication="UAPI" xmlns:com="http://www.travelport.com/schema/common_${uapiVersion}"/>
             <air:AirItinerary>
                 {{#segments}}
                 <air:AirSegment ArrivalTime="{{arrival}}"
@@ -43,14 +40,14 @@ module.exports = `
             {{#if business}}
             <air:AirPricingModifiers InventoryRequestType="DirectAccess">
                 <air:PermittedCabins>
-                    <com:CabinClass Type="Business" xmlns:com="http://www.travelport.com/schema/common_v47_0" />
+                    <com:CabinClass Type="Business" xmlns:com="http://www.travelport.com/schema/common_${uapiVersion}" />
                 </air:PermittedCabins>
             </air:AirPricingModifiers>
             {{else}}
             <air:AirPricingModifiers InventoryRequestType="DirectAccess"/>
             {{/if}}
             {{#passengers}}
-            <com:SearchPassenger Key="P_{{@index}}" Code="{{ageCategory}}" {{#if child}}Age="9"{{else if Age}}Age="{{Age}}"{{/if}} xmlns:com="http://www.travelport.com/schema/common_v47_0"/>
+            <com:SearchPassenger Key="P_{{@index}}" Code="{{ageCategory}}" {{#if child}}Age="9"{{else if Age}}Age="{{Age}}"{{/if}} xmlns:com="http://www.travelport.com/schema/common_${uapiVersion}"/>
             {{/passengers}}
             <air:AirPricingCommand>
                 {{#segments}}

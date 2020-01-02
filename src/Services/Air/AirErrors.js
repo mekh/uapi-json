@@ -9,7 +9,7 @@ const errorCodes = require('../../error-codes');
 const AirValidationError = createErrorClass(
     'AirValidationError',
     ['Air service validation error', errorCodes.Validation],
-    errorTypes.ValidationError
+    errorTypes.ValidationError,
 );
 Object.assign(AirValidationError, createErrorsList({
     ParamsMissing: 'Params are missing',
@@ -37,13 +37,13 @@ Object.assign(AirValidationError, createErrorsList({
     CreditCardMissing: 'Missing creditCard in request. See data.',
     IncorrectConnectionsFormat: 'Connections should be an array with IATA codes.',
     PlatingCarrierInvalid: 'Plating Carrier Invalid',
-    SearchIdMissing: 'SearchId is missing'
+    SearchIdMissing: 'SearchId is missing',
 }, AirValidationError));
 
 const GdsValidationError = createErrorClass(
     'GdsValidationError',
     ['Gds service validation error', errorCodes.Validation],
-    errorTypes.ValidationError
+    errorTypes.ValidationError,
 );
 Object.assign(GdsValidationError, createErrorsList({
     PnrMissing: 'PNR is missing in request',
@@ -54,7 +54,7 @@ Object.assign(GdsValidationError, createErrorsList({
 const AirFlightInfoValidationError = createErrorClass(
     'AirFlightInfoValidationError',
     ['Air FlightInfo service validation error', errorCodes.Validation],
-    errorTypes.ValidationError
+    errorTypes.ValidationError,
 );
 Object.assign(AirFlightInfoValidationError, createErrorsList({
     AirlineMissing: 'Airline is missing in request',
@@ -66,7 +66,7 @@ Object.assign(AirFlightInfoValidationError, createErrorsList({
 const AirParsingError = createErrorClass(
     'AirParsingError',
     'Air service parsing error',
-    errorTypes.ParsingError
+    errorTypes.ParsingError,
 );
 Object.assign(AirParsingError, createErrorsList({
     ResponseDataMissing: 'One of main data arrays is missing in parsed XML response',
@@ -88,10 +88,10 @@ Object.assign(AirParsingError, createErrorsList({
 const AirRuntimeError = createErrorClass(
     'AirRuntimeError',
     ['Air service runtime error', 598],
-    errorTypes.RuntimeError
+    errorTypes.RuntimeError,
 );
 Object.assign(AirRuntimeError, createErrorsList({
-    SegmentBookingFailed: 'Failed to book on or more segments',
+    SegmentBookingFailed: 'Failed to book on one or more segments',
     SegmentWaitlisted: 'One or more segments is waitlisted, not allowed',
     TicketingFailed: 'Ticketing failed',
     TicketingFoidRequired: 'FOID required for the PC selected',
@@ -134,7 +134,7 @@ Object.assign(AirRuntimeError, createErrorsList({
 const AirFlightInfoRuntimeError = createErrorClass(
     'AirFlightInfoRuntimeError',
     ['Air flight info service runtime error', errorCodes.UapiFailure],
-    errorTypes.RuntimeError
+    errorTypes.RuntimeError,
 );
 Object.assign(AirFlightInfoRuntimeError, createErrorsList({
     FlightNotFound: 'Flight not found',
@@ -145,7 +145,7 @@ Object.assign(AirFlightInfoRuntimeError, createErrorsList({
 const GdsRuntimeError = createErrorClass(
     'GdsRuntimeError',
     ['Gds service runtime error', errorCodes.GdsFailure],
-    errorTypes.RuntimeError
+    errorTypes.RuntimeError,
 );
 Object.assign(GdsRuntimeError, createErrorsList({
     PlacingInQueueMessageMissing: 'Placing success message missing',

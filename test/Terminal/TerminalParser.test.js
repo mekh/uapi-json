@@ -37,7 +37,7 @@ describe('#TerminalParser', () => {
                 .catch((err) => {
                     expect(err.data.pcc).to.be.equal('79YE');
                     expect(err).to.be.an.instanceof(
-                        TerminalError.TerminalRuntimeError.NoAgreement
+                        TerminalError.TerminalRuntimeError.NoAgreement,
                     );
                 });
         });
@@ -79,7 +79,7 @@ describe('#TerminalParser', () => {
                 throw new Error('Successfully parsed error result');
             }).catch(err => {
                 expect(err).to.be.an.instanceof(
-                    TerminalError.TerminalParsingError.TerminalSessionTokenMissing
+                    TerminalError.TerminalParsingError.TerminalSessionTokenMissing,
                 );
             });
         });
@@ -107,7 +107,7 @@ describe('#TerminalParser', () => {
                 throw new Error('Successfully parsed error result');
             }).catch(err => {
                 expect(err).to.be.an.instanceof(
-                    TerminalError.TerminalParsingError.TerminalResponseMissing
+                    TerminalError.TerminalParsingError.TerminalResponseMissing,
                 );
             });
         });
@@ -122,7 +122,7 @@ describe('#TerminalParser', () => {
                 throw new Error('Successfully parsed error result');
             }).catch(err => {
                 expect(err).to.be.an.instanceof(
-                    TerminalError.TerminalParsingError.TerminalResponseMissing
+                    TerminalError.TerminalParsingError.TerminalResponseMissing,
                 );
             });
         });
@@ -153,7 +153,7 @@ describe('#TerminalParser', () => {
                 throw new Error('Successfully parsed error result');
             }).catch(err => {
                 expect(err).to.be.an.instanceof(
-                    TerminalError.TerminalRuntimeError.TerminalCloseSessionFailed
+                    TerminalError.TerminalRuntimeError.TerminalCloseSessionFailed,
                 );
             });
         });
@@ -168,7 +168,7 @@ describe('#TerminalParser', () => {
                 throw new Error('Successfully parsed error result');
             }).catch(err => {
                 expect(err).to.be.an.instanceof(
-                    TerminalError.TerminalRuntimeError.TerminalCloseSessionFailed
+                    TerminalError.TerminalRuntimeError.TerminalCloseSessionFailed,
                 );
             });
         });

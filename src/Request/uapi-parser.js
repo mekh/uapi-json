@@ -39,12 +39,7 @@ function mergeLeaf(item) {
 
 function Parser(root, uapiVersion, env, debug, config, provider, logger) {
     this.debug = debug;
-    if (!config) {
-        this.config = defaultConfig(uapiVersion);
-    } else {
-        this.config = config;
-    }
-
+    this.config = config || defaultConfig(uapiVersion);
     this.provider = provider || '1G';
     this.uapi_version = uapiVersion;
     this.env = env;
@@ -157,15 +152,15 @@ Parser.prototype.parseVersion = function (obj) {
     const detail = obj['SOAP:Fault'][0].detail[0];
     const parsedVersions = Object.keys(detail)
         .filter(
-            key => key.match(/ErrorInfo$/i)
+            key => key.match(/ErrorInfo$/i),
         )
         .reduce(
             (acc, key) => acc.concat(
                 Object.keys(detail[key][0].$)
                     .filter(detailKey => detailKey.match(/^xmlns/i))
-                    .map(detailKey => detail[key][0].$[detailKey])
+                    .map(detailKey => detail[key][0].$[detailKey]),
             ),
-            []
+            [],
         )
         .map(xmlns => xmlns.match(/_(v\d+_\d+)$/))
         .filter(version => version !== null);

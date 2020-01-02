@@ -9,7 +9,7 @@ const errorCodes = require('../../error-codes');
 const TerminalValidationError = createErrorClass(
     'TerminalValidationError',
     ['Terminal service validation error', errorCodes.Validation],
-    errorTypes.ValidationError
+    errorTypes.ValidationError,
 );
 Object.assign(TerminalValidationError, createErrorsList({
     ParamsMissing: 'Params are missing',
@@ -26,7 +26,7 @@ Object.assign(TerminalValidationError, createErrorsList({
 const TerminalParsingError = createErrorClass(
     'TerminalParsingError',
     ['Terminal service parsing error', errorCodes.GdsFailure],
-    errorTypes.ParsingError
+    errorTypes.ParsingError,
 );
 Object.assign(TerminalParsingError, createErrorsList({
     TerminalSessionTokenMissing: 'Terminal session token is missing in service response',
@@ -37,7 +37,7 @@ Object.assign(TerminalParsingError, createErrorsList({
 const TerminalRuntimeError = createErrorClass(
     'TerminalRuntimeError',
     ['Terminal service runtime error', errorCodes.GdsFailure],
-    errorTypes.RuntimeError
+    errorTypes.RuntimeError,
 );
 Object.assign(TerminalRuntimeError, createErrorsList({
     TerminalEmulationFailed: 'Terminal emulation failed',

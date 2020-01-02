@@ -1,6 +1,6 @@
-function urls(region, production = true) {
+module.exports = (region = 'emea', production = false) => {
     const prefix = production ? '' : 'pp.';
-    const timeout = production ? 100000 : 200000;
+    const timeout = production ? 100000 : 300000;
     const url = `https://${region}.universal-api.${prefix}travelport.com/B2BGateway/connect/uAPI`;
     return {
         timeout,
@@ -26,8 +26,4 @@ function urls(region, production = true) {
             url: `${url}/TerminalService`,
         },
     };
-}
-
-module.exports = function (region = 'emea', production = true) {
-    return urls(region, production);
 };

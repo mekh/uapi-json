@@ -37,7 +37,7 @@ const getTerminalResponse = path => new Promise((resolve, reject) => {
             }
             const res = rTrim(data.toString());
             resolve(res.split(/\n/));
-        }
+        },
     );
 });
 
@@ -50,7 +50,7 @@ const semOrErr = (params, type = 'SEM') => (params.command.match(/^SEM/)
     ? getTerminalResponse(type)
     : getTerminalResponse('ERR'));
 
-const executeCommandSlow = sinon.spy((params) => {
+const executeCommandSlow = sinon.spy(params => {
     expect(params).to.be.an('object');
     expect(params.sessionToken).to.equal(token);
     expect(params.command).to.be.a('string');
@@ -62,7 +62,7 @@ const executeCommandSlow = sinon.spy((params) => {
     return semOrErr(params);
 });
 
-const executeCommandOk = sinon.spy((params) => {
+const executeCommandOk = sinon.spy(params => {
     expect(params).to.be.an('object');
     expect(params.sessionToken).to.equal(token);
     expect(params.command).to.be.a('string');
@@ -70,22 +70,22 @@ const executeCommandOk = sinon.spy((params) => {
     return {
         I: getTerminalResponse('I'),
         TE: getTerminalResponse('set01/TE-P1'),
-        MD: getTerminalResponse('set01/TE-P2')
+        MD: getTerminalResponse('set01/TE-P2'),
     }[params.command] || semOrErr(params);
 });
 
-const executeCommandMdIssues = sinon.spy((params) => {
+const executeCommandMdIssues = sinon.spy(params => {
     expect(params).to.be.an('object');
     expect(params.sessionToken).to.equal(token);
     expect(params.command).to.be.a('string');
 
     const mdCall = sinon.stub();
     mdCall.onCall(0).returns(
-        getTerminalResponse('set02/HFF-P2')
+        getTerminalResponse('set02/HFF-P2'),
     );
 
     mdCall.onCall(1).returns(
-        getTerminalResponse('set02/HFF-P3')
+        getTerminalResponse('set02/HFF-P3'),
     );
 
     return {
@@ -241,7 +241,7 @@ describe('#Terminal', function terminalTest() {
                     expect(getSessionToken.callCount).to.equal(1);
                     expect(executeCommandOk.callCount).to.equal(0);
                     expect(err).to.be.an.instanceof(
-                        TerminalRuntimeError.TerminalIsClosed
+                        TerminalRuntimeError.TerminalIsClosed,
                     );
                 });
         });
@@ -263,7 +263,7 @@ describe('#Terminal', function terminalTest() {
                     expect(getSessionToken.callCount).to.equal(1);
                     expect(executeCommandSlow.callCount).to.equal(2);
                     expect(err).to.be.an.instanceof(
-                        TerminalRuntimeError.TerminalIsBusy
+                        TerminalRuntimeError.TerminalIsBusy,
                     );
                 });
         });
@@ -391,7 +391,7 @@ describe('#Terminal', function terminalTest() {
                     expect(executeCommandEmulationFailed.getCall(0).args[0].sessionToken).to.equal(token);
                     expect(executeCommandEmulationFailed.getCall(0).args[0].command).to.equal(`SEM/${emulatePcc}/AG`);
                     expect(err).to.be.an.instanceof(
-                        TerminalRuntimeError.TerminalEmulationFailed
+                        TerminalRuntimeError.TerminalEmulationFailed,
                     );
                     return uAPITerminal.closeSession();
                 });
@@ -457,7 +457,7 @@ describe('#Terminal', function terminalTest() {
                     const auth = Object.assign(
                         {},
                         emulateConfig,
-                        { token: sessionToken }
+                        { token: sessionToken },
                     );
 
                     uAPITerminal = terminalOk({

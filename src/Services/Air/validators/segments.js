@@ -20,7 +20,7 @@ module.exports = params => {
             hasAllFields(
                 segment,
                 requiredFields,
-                AirValidationError.SegmentsMissing
+                AirValidationError.SegmentsMissing,
             );
         });
     }

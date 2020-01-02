@@ -8,6 +8,6 @@ module.exports = params => {
     hasAllFields(
         params.phone,
         requiredFields,
-        AirValidationError.IncorrectPhoneFormat
+        AirValidationError.IncorrectPhoneFormat,
     );
 };

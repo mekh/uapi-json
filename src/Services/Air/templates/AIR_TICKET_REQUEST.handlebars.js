@@ -1,11 +1,10 @@
-module.exports = `
-<!--Release 8.1--><!--Version Dated as of 15/Apr/2015 11:24:08-->
+module.exports = uapiVersion => `
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
   <soap:Header/>
   <soap:Body>
     <air:AirTicketingReq AuthorizedBy="user" ReturnInfoOnFail="true" TargetBranch="{{TargetBranch}}"
-      xmlns:air="http://www.travelport.com/schema/air_v47_0"
-      xmlns:com="http://www.travelport.com/schema/common_v47_0"
+      xmlns:air="http://www.travelport.com/schema/air_${uapiVersion}"
+      xmlns:com="http://www.travelport.com/schema/common_${uapiVersion}"
       >
       <com:BillingPointOfSaleInfo OriginApplication="uAPI"/>
       {{#if emulatePcc}}

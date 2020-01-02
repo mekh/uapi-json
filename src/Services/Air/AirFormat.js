@@ -117,7 +117,7 @@ function formatPrices(prices) {
 function formatTrip(segment, flightDetails) {
     const flightInfo = flightDetails
         ? Object.keys(flightDetails).map(
-            detailsKey => flightDetails[detailsKey]
+            detailsKey => flightDetails[detailsKey],
         )
         : [];
     const plane = flightInfo.map(details => details.Equipment || 'Unknown');
@@ -183,7 +183,7 @@ function formatPassengerCategories(pricingInfo) {
 
             return {
                 ...acc,
-                [code]: passengerFare
+                [code]: passengerFare,
             };
         }, {});
 
@@ -293,13 +293,13 @@ function formatLowFaresSearch(searchRequest, searchResult) {
                 const fareInfo = fareInfos[segmentInfo.FareInfoRef];
                 const segment = segments[segmentInfo.SegmentRef];
                 const tripFlightDetails = segment['air:FlightDetailsRef'].map(
-                    flightDetailsRef => flightDetails[flightDetailsRef]
+                    flightDetailsRef => flightDetails[flightDetailsRef],
                 );
                 const seatsAvailable = (
                     segment['air:AirAvailInfo'] && segment['air:AirAvailInfo'].ProviderCode === provider)
                     ? (Number(
                         segment['air:AirAvailInfo']['air:BookingCodeInfo'].BookingCounts
-                            .match(new RegExp(`${segmentInfo.BookingCode}(\\d+)`))[1]
+                            .match(new RegExp(`${segmentInfo.BookingCode}(\\d+)`))[1],
                     ))
                     : null;
                 return Object.assign(
@@ -310,7 +310,7 @@ function formatLowFaresSearch(searchRequest, searchResult) {
                         baggage: [getBaggage(fareInfo['air:BaggageAllowance'])],
                         fareBasisCode: fareInfo.FareBasis,
                     },
-                    seatsAvailable ? { seatsAvailable } : null
+                    seatsAvailable ? { seatsAvailable } : null,
                 );
             });
             return {
@@ -349,7 +349,7 @@ function formatLowFaresSearch(searchRequest, searchResult) {
 
     if (searchRequest.faresOnly === false) {
         const result = {
-            fares
+            fares,
         };
         if ({}.hasOwnProperty.call(searchResult, 'TransactionId')) {
             result.transactionId = searchResult.TransactionId;
@@ -377,7 +377,7 @@ function formatLowFaresSearch(searchRequest, searchResult) {
  */
 function setIndexesForSegments(
     segmentsObject = null,
-    serviceSegmentsObject = null
+    serviceSegmentsObject = null,
 ) {
     const segments = segmentsObject
         ? Object.values(segmentsObject) // Object.values(segmentObject)
@@ -404,7 +404,7 @@ function setIndexesForSegments(
             (segment, key) => ({
                 ...segment,
                 index: key + 1,
-            })
+            }),
         );
         return { segments, serviceSegments: serviceSegmentsNew };
     }
@@ -414,7 +414,7 @@ function setIndexesForSegments(
 
     const maxOrder = Math.max(
         maxSegmentsSegmentOrder,
-        maxServiceSegmentsSegmentOrder
+        maxServiceSegmentsSegmentOrder,
     );
 
     const allSegments = [];

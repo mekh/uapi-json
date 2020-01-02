@@ -112,7 +112,7 @@ describe('#AirService', () => {
             };
 
             const airPricePricingSolutionXML = sinon.spy(
-                () => Promise.resolve({ foo: 123 })
+                () => Promise.resolve({ foo: 123 }),
             );
             const createReservation = sinon.spy((options) => {
                 expect(options.foo).to.be.equal(123);
@@ -143,7 +143,7 @@ describe('#AirService', () => {
             };
 
             const airPricePricingSolutionXML = sinon.spy(
-                () => Promise.resolve({ foo: 123 })
+                () => Promise.resolve({ foo: 123 }),
             );
             const createReservation = sinon.spy((options) => {
                 expect(options.foo).to.be.equal(123);
@@ -170,12 +170,12 @@ describe('#AirService', () => {
         it('should call cancel ur if no valid fare', () => {
             const params = { passengers: [], rule: 'RULE', allowWaitlist: true };
             const airPricePricingSolutionXML = sinon.spy(
-                () => Promise.resolve({ foo: 123 })
+                () => Promise.resolve({ foo: 123 }),
             );
             const createReservation = sinon.spy(
                 () => Promise.reject(new AirRuntimeError.NoValidFare({
                     'universal:UniversalRecord': { LocatorCode: 123 },
-                }))
+                })),
             );
             const cancelUR = sinon.spy((options) => {
                 expect(options.LocatorCode).to.be.equal(123);
@@ -206,12 +206,12 @@ describe('#AirService', () => {
         it('should call cancel ur if segment booking failed', () => {
             const params = { passengers: [], rule: 'RULE', allowWaitlist: true };
             const airPricePricingSolutionXML = sinon.spy(
-                () => Promise.resolve({ foo: 123 })
+                () => Promise.resolve({ foo: 123 }),
             );
             const createReservation = sinon.spy(
                 () => Promise.reject(new AirRuntimeError.SegmentBookingFailed({
                     'universal:UniversalRecord': { LocatorCode: 123 },
-                }))
+                })),
             );
             const cancelUR = sinon.spy((options) => {
                 expect(options.LocatorCode).to.be.equal(123);
@@ -242,12 +242,12 @@ describe('#AirService', () => {
         it('should not call cancel ur if other error', () => {
             const params = { passengers: [], rule: 'RULE', allowWaitlist: true };
             const airPricePricingSolutionXML = sinon.spy(
-                () => Promise.resolve({ foo: 123 })
+                () => Promise.resolve({ foo: 123 }),
             );
             const createReservation = sinon.spy(
                 () => Promise.reject(new AirRuntimeError.TicketingFailed({
                     'universal:UniversalRecord': { LocatorCode: 123 },
-                }))
+                })),
             );
             const cancelUR = sinon.spy((options) => {
                 expect(options.LocatorCode).to.be.equal(123);
@@ -278,12 +278,12 @@ describe('#AirService', () => {
         it('should not call cancel ur if segment booking failed with SegmentBookingFailed or NoValidFare but restrictWaitlist=true', () => {
             const params = { passengers: [], rule: 'RULE', allowWaitlist: false };
             const airPricePricingSolutionXML = sinon.spy(
-                () => Promise.resolve({ foo: 123 })
+                () => Promise.resolve({ foo: 123 }),
             );
             const createReservation = sinon.spy(
                 () => Promise.reject(new AirRuntimeError.SegmentBookingFailed({
                     detail: { },
-                }))
+                })),
             );
             const cancelUR = sinon.spy((options) => {
                 expect(options.LocatorCode).to.be.equal(123);
@@ -314,7 +314,7 @@ describe('#AirService', () => {
         it('should not call cancel ur if segment booking failed with NoValidFare but restrictWaitlist=true', () => {
             const params = { passengers: [], rule: 'RULE', allowWaitlist: false };
             const airPricePricingSolutionXML = sinon.spy(
-                () => Promise.resolve({ foo: 123 })
+                () => Promise.resolve({ foo: 123 }),
             );
             const createReservation = sinon.spy(() => Promise.reject(new AirRuntimeError.NoValidFare({
                 detail: { },
@@ -348,12 +348,12 @@ describe('#AirService', () => {
         it('should not call cancel ur if segment booking failed with other error and restrictWaitlist=true', () => {
             const params = { passengers: [], rule: 'RULE', allowWaitlist: false };
             const airPricePricingSolutionXML = sinon.spy(
-                () => Promise.resolve({ foo: 123 })
+                () => Promise.resolve({ foo: 123 }),
             );
             const createReservation = sinon.spy(
                 () => Promise.reject(new AirRuntimeError.SegmentWaitlisted({
                     detail: { },
-                }))
+                })),
             );
             const cancelUR = sinon.spy((options) => {
                 expect(options.LocatorCode).to.be.equal(123);
@@ -439,14 +439,14 @@ describe('#AirService', () => {
         });
         it('should throw an error when it is unable to open PNR in rerminal', () => {
             const getUniversalRecordByPNR = sinon.spy(
-                () => Promise.reject(new AirRuntimeError.NoReservationToImport())
+                () => Promise.reject(new AirRuntimeError.NoReservationToImport()),
             );
             const executeCommand = sinon.stub();
             executeCommand.onCall(0).returns(
-                Promise.resolve('FINISH OR IGNORE')
+                Promise.resolve('FINISH OR IGNORE'),
             );
             const closeSession = sinon.spy(
-                () => Promise.resolve(true)
+                () => Promise.resolve(true),
             );
 
             // Services
@@ -475,17 +475,17 @@ describe('#AirService', () => {
         });
         it('should throw an error when it is unable to add an extra segment', () => {
             const getUniversalRecordByPNR = sinon.spy(
-                () => Promise.reject(new AirRuntimeError.NoReservationToImport())
+                () => Promise.reject(new AirRuntimeError.NoReservationToImport()),
             );
             const executeCommand = sinon.stub();
             executeCommand.onCall(0).returns(
-                Promise.resolve(pnrString)
+                Promise.resolve(pnrString),
             );
             executeCommand.onCall(1).returns(
-                Promise.resolve('ERR: FORMAT')
+                Promise.resolve('ERR: FORMAT'),
             );
             const closeSession = sinon.spy(
-                () => Promise.resolve(true)
+                () => Promise.resolve(true),
             );
 
             // Services
@@ -514,28 +514,28 @@ describe('#AirService', () => {
         });
         it('should throw an error when it is unable to add an extra segment (no segment added)', () => {
             const getUniversalRecordByPNR = sinon.spy(
-                () => Promise.reject(new AirRuntimeError.NoReservationToImport())
+                () => Promise.reject(new AirRuntimeError.NoReservationToImport()),
             );
             const executeCommand = sinon.stub();
             executeCommand.onCall(0).returns(
-                Promise.resolve(pnrString)
+                Promise.resolve(pnrString),
             );
             executeCommand.onCall(1).returns(
-                Promise.resolve(segmentResult)
+                Promise.resolve(segmentResult),
             );
             executeCommand.onCall(2).returns(
-                Promise.resolve(true)
+                Promise.resolve(true),
             );
             executeCommand.onCall(3).returns(
-                Promise.resolve(true)
+                Promise.resolve(true),
             );
             executeCommand.onCall(4).returns(
                 Promise.resolve([
                     pnrString,
-                ].join('\n'))
+                ].join('\n')),
             );
             const closeSession = sinon.spy(
-                () => Promise.resolve(true)
+                () => Promise.resolve(true),
             );
 
             // Services
@@ -557,7 +557,7 @@ describe('#AirService', () => {
                 .catch((error) => {
                     expect(error).to.be.an.instanceOf(AirRuntimeError.UnableToImportPnr);
                     expect(error.causedBy).to.be.an.instanceOf(
-                        AirRuntimeError.UnableToSaveBookingWithExtraSegment
+                        AirRuntimeError.UnableToSaveBookingWithExtraSegment,
                     );
                     expect(getUniversalRecordByPNR).to.have.callCount(1);
                     expect(executeCommand).to.have.callCount(5);
@@ -566,28 +566,28 @@ describe('#AirService', () => {
         });
         it('should throw an error when it is unable to add an extra segment (no PNR parsed)', () => {
             const getUniversalRecordByPNR = sinon.spy(
-                () => Promise.reject(new AirRuntimeError.NoReservationToImport())
+                () => Promise.reject(new AirRuntimeError.NoReservationToImport()),
             );
             const executeCommand = sinon.stub();
             executeCommand.onCall(0).returns(
-                Promise.resolve(pnrString)
+                Promise.resolve(pnrString),
             );
             executeCommand.onCall(1).returns(
-                Promise.resolve(segmentResult)
+                Promise.resolve(segmentResult),
             );
             executeCommand.onCall(2).returns(
-                Promise.resolve(true)
+                Promise.resolve(true),
             );
             executeCommand.onCall(3).returns(
-                Promise.resolve(true)
+                Promise.resolve(true),
             );
             executeCommand.onCall(4).returns(
                 Promise.resolve([
                     segmentResult,
-                ].join('\n'))
+                ].join('\n')),
             );
             const closeSession = sinon.spy(
-                () => Promise.resolve(true)
+                () => Promise.resolve(true),
             );
 
             // Services
@@ -609,7 +609,7 @@ describe('#AirService', () => {
                 .catch((error) => {
                     expect(error).to.be.an.instanceOf(AirRuntimeError.UnableToImportPnr);
                     expect(error.causedBy).to.be.an.instanceOf(
-                        AirRuntimeError.UnableToSaveBookingWithExtraSegment
+                        AirRuntimeError.UnableToSaveBookingWithExtraSegment,
                     );
                     expect(getUniversalRecordByPNR).to.have.callCount(1);
                     expect(executeCommand).to.have.callCount(5);
@@ -620,32 +620,32 @@ describe('#AirService', () => {
         it('should run to the end if everything is OK', () => {
             const getUniversalRecordByPNR = sinon.stub();
             getUniversalRecordByPNR.onCall(0).returns(
-                Promise.reject(new AirRuntimeError.NoReservationToImport())
+                Promise.reject(new AirRuntimeError.NoReservationToImport()),
             );
             getUniversalRecordByPNR.onCall(1).returns(Promise.resolve(getURByPNRSampleBooked));
             getUniversalRecordByPNR.onCall(2).returns(Promise.resolve(getURByPNRSampleBooked));
             const cancelBooking = sinon.spy(() => Promise.resolve(true));
             const executeCommand = sinon.stub();
             executeCommand.onCall(0).returns(
-                Promise.resolve(pnrString)
+                Promise.resolve(pnrString),
             );
             executeCommand.onCall(1).returns(
-                Promise.resolve(segmentResult)
+                Promise.resolve(segmentResult),
             );
             executeCommand.onCall(2).returns(
-                Promise.resolve(true)
+                Promise.resolve(true),
             );
             executeCommand.onCall(3).returns(
-                Promise.resolve(true)
+                Promise.resolve(true),
             );
             executeCommand.onCall(4).returns(
                 Promise.resolve([
                     pnrString,
                     segmentResult,
-                ].join('\n'))
+                ].join('\n')),
             );
             const closeSession = sinon.spy(
-                () => Promise.resolve(true)
+                () => Promise.resolve(true),
             );
 
             // Services
@@ -668,7 +668,7 @@ describe('#AirService', () => {
                 .catch((error) => {
                     expect(error).to.be.an.instanceOf(AirRuntimeError.UnableToImportPnr);
                     expect(error.causedBy).to.be.an.instanceOf(
-                        AirRuntimeError.UnableToSaveBookingWithExtraSegment
+                        AirRuntimeError.UnableToSaveBookingWithExtraSegment,
                     );
                     expect(getUniversalRecordByPNR).to.have.callCount(1);
                     expect(executeCommand).to.have.callCount(5);
@@ -682,7 +682,7 @@ describe('#AirService', () => {
             const params = { pnr: 'PNR001' };
 
             const getUniversalRecordByPNR = sinon.spy(
-                () => Promise.resolve(getURbyPNRSampleTicketed)
+                () => Promise.resolve(getURbyPNRSampleTicketed),
             );
             const ticket = sinon.spy((options) => {
                 expect(options.ReservationLocator).to.be.equal('ABCDEF');
@@ -706,7 +706,7 @@ describe('#AirService', () => {
             const params = { pnr: 'PNR001' };
 
             const getUniversalRecordByPNR = sinon.spy(
-                () => Promise.resolve(getURbyPNRSampleTicketed)
+                () => Promise.resolve(getURbyPNRSampleTicketed),
             );
             const ticketResponses = [
                 Promise.resolve(),
@@ -737,7 +737,7 @@ describe('#AirService', () => {
             const params = { pnr: 'PNR001' };
 
             const getUniversalRecordByPNR = sinon.spy(
-                () => Promise.resolve(getURbyPNRSampleTicketed)
+                () => Promise.resolve(getURbyPNRSampleTicketed),
             );
             const ticketResponses = [
                 Promise.resolve(),
@@ -767,7 +767,7 @@ describe('#AirService', () => {
             const params = { pnr: 'PNR001' };
 
             const getUniversalRecordByPNR = sinon.spy(
-                () => Promise.resolve(getURbyPNRSampleTicketed)
+                () => Promise.resolve(getURbyPNRSampleTicketed),
             );
             const ticketResponses = [
                 () => Promise.resolve(),
@@ -798,7 +798,7 @@ describe('#AirService', () => {
             const params = { pnr: 'PNR001' };
 
             const getUniversalRecordByPNR = sinon.spy(
-                () => Promise.resolve(getURbyPNRSampleTicketed)
+                () => Promise.resolve(getURbyPNRSampleTicketed),
             );
             const ticketResponses = [
                 Promise.reject(new AirRuntimeError.NoValidFare()),
@@ -880,13 +880,13 @@ describe('#AirService', () => {
         it('should get ticket data if duplicate ticket found', () => {
             const getTicket = sinon.stub();
             getTicket.onCall(0).returns(
-                Promise.reject(new AirRuntimeError.DuplicateTicketFound())
+                Promise.reject(new AirRuntimeError.DuplicateTicketFound()),
             );
             getTicket.onCall(1).returns(
                 Promise.resolve({
                     pnr: 'PNR001',
                     ticketNumber: '1234567890123',
-                })
+                }),
             );
             // Spies
             const cancelTicket = sinon.spy(() => Promise.resolve(true));
@@ -960,7 +960,7 @@ describe('#AirService', () => {
     describe('getBookingByTicketNumber', () => {
         it('should fail when ticket data not available by ticket number', (done) => {
             const response = fs.readFileSync(
-                path.join(terminalResponsesDir, 'getTicketNotExists.txt')
+                path.join(terminalResponsesDir, 'getTicketNotExists.txt'),
             ).toString();
             const createTerminalService = () => ({
                 // The only command is executed, no analyze needed
@@ -1017,7 +1017,7 @@ describe('#AirService', () => {
         it('should fail when no TerminalService enabled for uAPI credentials');
         it('should return PNR when response is OK', (done) => {
             const response = fs.readFileSync(
-                path.join(terminalResponsesDir, 'getTicketVoid.txt')
+                path.join(terminalResponsesDir, 'getTicketVoid.txt'),
             ).toString();
             const createTerminalService = () => ({
                 // The only command is executed, no analyze needed
@@ -1058,10 +1058,10 @@ describe('#AirService', () => {
         });
         it('should work with right responses', (done) => {
             const importBookingVoidResponse = JSON.parse(
-                fs.readFileSync(path.join(responsesDir, 'importBooking_VOID.json')).toString()
+                fs.readFileSync(path.join(responsesDir, 'importBooking_VOID.json')).toString(),
             );
             const getTicketVoidResponse = JSON.parse(
-                fs.readFileSync(path.join(responsesDir, 'getTicket_VOID.json')).toString()
+                fs.readFileSync(path.join(responsesDir, 'getTicket_VOID.json')).toString(),
             );
             const AirService = () => ({
                 getUniversalRecordByPNR: () => Promise.resolve(importBookingVoidResponse),
@@ -1097,7 +1097,7 @@ describe('#AirService', () => {
             const closeSession = sinon.spy(() => Promise.resolve());
 
             const bookingPnr = sinon.spy(
-                screen => ((screen === 'pnrscreen') ? '123QWE' : null)
+                screen => ((screen === 'pnrscreen') ? '123QWE' : null),
             );
 
             const searchPassengersList = sinon.spy(
@@ -1105,7 +1105,7 @@ describe('#AirService', () => {
                     (screen === 'listscreen')
                         ? [{ id: 1, name: 'first' }, { id: 2, name: 'last' }]
                         : null
-                )
+                ),
             );
 
 
@@ -1143,7 +1143,7 @@ describe('#AirService', () => {
             const executeCommand = sinon.spy(() => returnBooking());
 
             const bookingPnr = sinon.spy(
-                screen => ((screen === 'pnrscreen') ? '123QWE' : null)
+                screen => ((screen === 'pnrscreen') ? '123QWE' : null),
             );
 
             const searchPassengersList = sinon.spy(
@@ -1151,7 +1151,7 @@ describe('#AirService', () => {
                     (screen === 'listscreen')
                         ? [{ id: 1, name: 'first' }, { id: 2, name: 'last' }]
                         : null
-                )
+                ),
             );
 
 
@@ -1256,13 +1256,13 @@ describe('#AirService', () => {
             // Get ticket stub to return 2 different values on different calls
             const getTicket = sinon.stub();
             getTicket.onCall(0).returns(
-                Promise.reject(new AirRuntimeError.TicketInfoIncomplete())
+                Promise.reject(new AirRuntimeError.TicketInfoIncomplete()),
             );
             getTicket.onCall(1).returns(
                 Promise.resolve({
                     pnr: 'PNR001',
                     ticketNumber: '1234567890123',
-                })
+                }),
             );
             // Spies
             const cancelTicket = sinon.spy(() => Promise.resolve(true));
@@ -1322,7 +1322,7 @@ describe('#AirService', () => {
         it('should cancel PNR if no tickets available', () => {
             // Spies
             const getUniversalRecordByPNR = sinon.spy(
-                () => Promise.resolve(getURbyPNRSampleTicketedWithEmptyTickets)
+                () => Promise.resolve(getURbyPNRSampleTicketedWithEmptyTickets),
             );
             const cancelBooking = sinon.spy(() => Promise.resolve(true));
             const getTicket = sinon.spy(() => Promise.resolve({
@@ -1619,7 +1619,7 @@ describe('#AirService', () => {
                 .catch((err) => {
                     expect(err).to.be.an.instanceof(AirRuntimeError.FailedToCancelPnr);
                     expect(err.causedBy).to.be.an.instanceof(
-                        AirRuntimeError.UnableToCancelTicketStatusNotOpen
+                        AirRuntimeError.UnableToCancelTicketStatusNotOpen,
                     );
                     expect(getUniversalRecordByPNR).to.have.callCount(1);
                     expect(getTickets).to.have.callCount(1);
@@ -1682,7 +1682,7 @@ describe('#AirService', () => {
         it('should check functions to be called', () => {
             const d = moment();
             const getUniversalRecordByPNR = sinon.spy(
-                () => Promise.resolve(getURByPNRSampleBooked)
+                () => Promise.resolve(getURByPNRSampleBooked),
             );
 
             const exchange = sinon.spy(({ bookingDate }) => {
@@ -1712,7 +1712,7 @@ describe('#AirService', () => {
     describe('exchangeBooking', () => {
         it('should check functions to be called', () => {
             const getUniversalRecordByPNR = sinon.spy(
-                () => Promise.resolve(getURbyPNRSampleTicketed)
+                () => Promise.resolve(getURbyPNRSampleTicketed),
             );
 
             const exchange = sinon.spy(({ exchangeToken, uapi_reservation_locator }) => {

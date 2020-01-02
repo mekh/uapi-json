@@ -8,7 +8,7 @@ module.exports = params => {
         hasAllFields(
             params.deliveryInformation,
             requiredFields,
-            AirValidationError.DeliveryInformation
+            AirValidationError.DeliveryInformation,
         );
     }
 };

@@ -36,7 +36,7 @@ const parse = (string) => {
         },
         documentNumber !== ''
             ? { documentNumber: documentNumber.substr(0, 13) }
-            : null
+            : null,
     );
 };
 

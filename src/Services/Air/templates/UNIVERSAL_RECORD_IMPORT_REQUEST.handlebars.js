@@ -1,5 +1,4 @@
-module.exports = `
-<!--Release 16.1.0.60--><!--Version Dated as of 06/Mar/2016-->
+module.exports = uapiVersion => `
 <soap:Envelope
   xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
   >
@@ -8,10 +7,10 @@ module.exports = `
     <univ:UniversalRecordImportReq
       AuthorizedBy="user" TraceId="{{requestId}}" TargetBranch="{{TargetBranch}}"
       ProviderCode="{{provider}}" ProviderLocatorCode="{{pnr}}"
-      xmlns:univ="http://www.travelport.com/schema/universal_v47_0"
-      xmlns:com="http://www.travelport.com/schema/common_v47_0"
+      xmlns:univ="http://www.travelport.com/schema/universal_${uapiVersion}"
+      xmlns:com="http://www.travelport.com/schema/common_${uapiVersion}"
       >
-      <com:BillingPointOfSaleInfo OriginApplication="uAPI" xmlns:com="http://www.travelport.com/schema/common_v47_0"/>
+      <com:BillingPointOfSaleInfo OriginApplication="uAPI" xmlns:com="http://www.travelport.com/schema/common_${uapiVersion}"/>
       {{#if emulatePcc}}
       <com:OverridePCC ProviderCode="{{provider}}" PseudoCityCode="{{emulatePcc}}"/>
       {{/if}}

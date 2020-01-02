@@ -14,7 +14,7 @@ describe('Air.transformers.setsSegmentRefForSSR', () => {
                     ssr: [
                         { type: 'FQTV', segment: 0 },
                         { type: 'FQTV', segment: 1 },
-                    ]
+                    ],
                 },
             ],
         };

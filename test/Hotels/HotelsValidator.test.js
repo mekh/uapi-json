@@ -119,7 +119,7 @@ describe('#HotelsValidator', () => {
             };
             const paramsImmutable2 = {
                 people: [{
-                    TravelerType: 'ADT', PrefixTypes: ['MR', 'MRS', 'MISS'], PrefixName: 'MR', FirstName: 'mark', LastName: 'orel', Nationality: 'UA', BirthDate: '1994-04-18', key: 1, room: 1, Country: 'UA', City: 'kiev', Street: 'street 123', PostalCode: '03000', Email: 'mail.ormark@gmail.com', CountryCode: '38', AreaCode: '093', Number: '1111111'
+                    TravelerType: 'ADT', PrefixTypes: ['MR', 'MRS', 'MISS'], PrefixName: 'MR', FirstName: 'mark', LastName: 'orel', Nationality: 'UA', BirthDate: '1994-04-18', key: 1, room: 1, Country: 'UA', City: 'kiev', Street: 'street 123', PostalCode: '03000', Email: 'mail.ormark@gmail.com', CountryCode: '38', AreaCode: '093', Number: '1111111',
                 }],
                 rates: [{
                     RatePlanType: 'FFFFFFFFFFFFFFF6',
@@ -135,14 +135,14 @@ describe('#HotelsValidator', () => {
                     CancelInfo: 'This booking is Non-Refundable and cannot be amended or modified. Failure to arrive at your hotel will be treated as a No-Show and no refund will be given (Hotel policy).',
                     GuaranteeInfo: { type: 'Prepayment', amount: 'EUR69.20' },
                     RoomRateDescription: {
-                        CommissionOnSurcharges: 'EUR0.00', RateDescription: 'Sell', RoomType: 'Double Room', Description: 'Double Room - Max Occupancy: 1\nPrice Includes: Breakfast\nPrice Excludes: Extra Bed', CommissionAmount: 'EUR3.81', TotalIncludes: ' The Total includes taxes, surcharges but not the fees. ', SupplierTermsandConditions: 'http://www.agoda.com/info/agoda_policies.html'
+                        CommissionOnSurcharges: 'EUR0.00', RateDescription: 'Sell', RoomType: 'Double Room', Description: 'Double Room - Max Occupancy: 1\nPrice Includes: Breakfast\nPrice Excludes: Extra Bed', CommissionAmount: 'EUR3.81', TotalIncludes: ' The Total includes taxes, surcharges but not the fees. ', SupplierTermsandConditions: 'http://www.agoda.com/info/agoda_policies.html',
                     },
                     CreditCards: ['AX', 'CA', 'VI'],
-                    Contacts: '+44 (0)20 3027 7900\n\nCS@agoda.com\nOn the Website / In booking confirmation mail\nhttp://www.agoda.com/info/contact_agoda.html'
+                    Contacts: '+44 (0)20 3027 7900\n\nCS@agoda.com\nOn the Website / In booking confirmation mail\nhttp://www.agoda.com/info/contact_agoda.html',
                 }],
                 HostToken: 'H4sIAAAAAAAAAFVSPWzTQBj98geERihNJJCKKjIgutlRkqZUHaC0BIxcUpGwdOJiX+xrLz737py4CIG60AFGGEBCYoBKSB0Y2RBigBVGJn5mRsTCwJ1biGrJn/T5fe9979157yfkBIfJdTRERiQJNa4i4a+gMHf0y7v3J299ykC6BccpQ24LOZJxC/LS51j4jLpxeOEi6KcwOqZqUb1ZCfkOFoKwwHIlVJo1B/dw3XHmG42GU3V7s9VG1cWztWZ9vjfn1CUUlnzsbLQj6SKJlZXTjHvGOnORIckAGzZzEF1WUFd1fy536K+XO8U0pK9BgSTYCqGUCBsmyJLPWcAo87YkTNlKxtQyppYxx9hCHAKkOkdaD0Ftmzm8zUnGDKvTHhPOdmTUe/Vxsr85tzqTAYhDxTtzmPfP4BoLcDK/a6ae3qlN/UjmRznI3OwuxbGEiSStFSRhN+Eu5LSZVKUKuslLOHWJsQ0SeFciLKQV9BkfIKlOU+0sjy9pkXO0ZRMh4+3P008+oGcZSFmQFeQ21vEgNcrqqkgVhw0MryZGRDq+4bliwFxMDZ9JVW8wNnjdfPPt3O69t2nIrkGJiGXcRxGVqyyMqDLp2lDu7VvqcjTEFHO9V0LR1nZMbcfUXxZsyDs+oa5udJiSDSeCaNDDvN1fdJWkkFDeJ1EUeKYVSOxhru8jDP//gxoyDqDS9+cvfm/vnE/rcLkhohGOORTHc9cT+ft7j6cnHn19kNZnrWPH8V9HUPmR1wIAAA==',
                 Guarantee: {
-                    CVV: '694', ExpDate: '2018-02', CardHolder: 'Mark Orel', CardNumber: '5598141266802346', CardType: 'MC', BankName: 'DBC', BankCountryCode: 'US'
+                    CVV: '694', ExpDate: '2018-02', CardHolder: 'Mark Orel', CardNumber: '5598141266802346', CardType: 'MC', BankName: 'DBC', BankCountryCode: 'US',
                 },
                 startDate: '2016-02-21',
                 HotelChain: '00',
@@ -150,7 +150,7 @@ describe('#HotelsValidator', () => {
                 endDate: '2016-02-22',
                 rooms: [{ adults: 1 }],
                 currency: 'USD',
-                roomsRefs: [{ adults: 1, adultsRefs: [1], children: [] }]
+                roomsRefs: [{ adults: 1, adultsRefs: [1], children: [] }],
             };
             HotelsValidator.HOTELS_BOOK_REQUEST(paramsImmutable);
             HotelsValidator.HOTELS_BOOK_REQUEST(paramsImmutable2);

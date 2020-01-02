@@ -1,19 +1,19 @@
 const uAPI = require('../../index');
 const config = require('../../test/testconfig');
-
+const { logger: log } = require('../../src/utils/logger');
 
 const AirService = uAPI.createAirService({
-  auth: config,
-  debug: 2,
-  production: true,
+    auth: config,
+    debug: 2,
+    production: true,
 });
 
 const params = {
-  pnr: 'CZMC82',
-  exchangeToken: 'token',
+    pnr: 'CZMC82',
+    exchangeToken: 'token',
 };
 
 AirService.exchangeBooking(params).then(
-  data => console.log(data),
-  err => console.log(err)
+    data => log.debug(data),
+    err => log.error(err)
 );

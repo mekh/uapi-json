@@ -1,10 +1,7 @@
-module.exports = `
-<!--AirCreateReservationReq-->
-<!--Release 8.1-->
-<!--Version Dated as of 15/Apr/2015 11:24:07-->
+module.exports = uapiVersion => `
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-    <soap:Header xmlns:univ="http://www.travelport.com/schema/universal_v47_0">
-        <univ:SupportedVersions airVersion="air_v47_0"/>
+    <soap:Header xmlns:univ="http://www.travelport.com/schema/universal_${uapiVersion}">
+        <univ:SupportedVersions airVersion="air_${uapiVersion}"/>
     </soap:Header>
     <soap:Body>
         <univ:AirCreateReservationReq
@@ -13,10 +10,10 @@ module.exports = `
             {{#if rule}}RuleName="{{rule}}"{{/if}}
             {{#if UniversalRecordLocatorCode}} UniversalRecordLocatorCode="{{UniversalRecordLocatorCode}}" {{/if}}
             {{#if allowWaitlist}}RestrictWaitlist="false"{{else}}RestrictWaitlist="true"{{/if}}
-            xmlns:univ="http://www.travelport.com/schema/universal_v47_0"
-            xmlns:com="http://www.travelport.com/schema/common_v47_0"
-            xmlns:air="http://www.travelport.com/schema/air_v47_0"
-            xmlns:common_v47_0="http://www.travelport.com/schema/common_v47_0"
+            xmlns:univ="http://www.travelport.com/schema/universal_${uapiVersion}"
+            xmlns:com="http://www.travelport.com/schema/common_${uapiVersion}"
+            xmlns:air="http://www.travelport.com/schema/air_${uapiVersion}"
+            xmlns:common_${uapiVersion}="http://www.travelport.com/schema/common_${uapiVersion}"
             >
             <com:BillingPointOfSaleInfo OriginApplication="uAPI" />
             {{#if emulatePcc}}
@@ -56,7 +53,7 @@ module.exports = `
                     {{#equal type "FQTV"}}
                         <com:LoyaltyCard Key="P_{{@index}}_FQTV" SupplierType="Air" SupplierCode="{{carrier}}" CardNumber="{{text}}" />
                     {{else}}
-                        <com:SSR Type="{{type}}"{#if carrier}} Carrier="{{carrier}}"{{/if}}{{#if segmentRef}} SegmentRef="{{{segmentRef}}}"{{/if}}{{#if status}} Status="{{{status}}}"{{/if}} FreeText="{{text}}" />
+                        <com:SSR Type="{{type}}"{{#if carrier}} Carrier="{{carrier}}"{{/if}}{{#if segmentRef}} SegmentRef="{{{segmentRef}}}"{{/if}}{{#if status}} Status="{{{status}}}"{{/if}} FreeText="{{text}}" />
                     {{/equal}}
                 {{/ssr}}
                 {{#if isChild}}
@@ -71,7 +68,7 @@ module.exports = `
                 {{{air:AirPricingSolution_XML.air:AirSegment_XML}}}
                 {{{air:AirPricingSolution_XML.air:AirPricingInfo_XML}}}
                 {{{air:AirPricingSolution_XML.air:FareNote_XML}}}
-                {{{air:AirPricingSolution_XML.common_v47_0:HostToken_XML}}}
+                {{{air:AirPricingSolution_XML.common_${uapiVersion}:HostToken_XML}}}
             </air:AirPricingSolution>
 
             <com:ActionStatus Type="{{ActionStatusType}}" TicketDate="{{ticketDate}}" ProviderCode="{{provider}}" />

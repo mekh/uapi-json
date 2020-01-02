@@ -112,11 +112,11 @@ describe('#AirFormat', () => {
                     ApproximateTotalPrice: 'UAH1026',
                     'air:BaggageRestriction': {
                         'air:TextInfo': {
-                            'air:Text': 'UPTO50LB/23KG AND UPTO62LI/158LCM'
-                        }
-                    }
+                            'air:Text': 'UPTO50LB/23KG AND UPTO62LI/158LCM',
+                        },
+                    },
                 },
-            ]
+            ],
         };
 
         it('should correctly parse air:TextInfo in pieces', () => {
@@ -124,7 +124,7 @@ describe('#AirFormat', () => {
                 'air:TextInfo': [
                     '1P',
                     'BAGGAGE DISCOUNTS MAY APPLY BASED ON FREQUENT FLYER STATUS/ ONLINE CHECKIN/FORM OF PAYMENT/MILITARY/ETC.',
-                ]
+                ],
             });
             expect(parsed).to.be.an('object').and.to.have.keys([
                 'amount', 'units',
@@ -137,7 +137,7 @@ describe('#AirFormat', () => {
                 'air:TextInfo': [
                     '20K',
                     'BAGGAGE DISCOUNTS MAY APPLY BASED ON FREQUENT FLYER STATUS/ ONLINE CHECKIN/FORM OF PAYMENT/MILITARY/ETC.',
-                ]
+                ],
             });
             expect(parsed).to.be.an('object').and.to.have.keys([
                 'amount', 'units',
@@ -163,7 +163,7 @@ describe('#AirFormat', () => {
             try {
                 AirFormat.formatPassengerCategories({
                     'TESTABCD12==': {
-                    }
+                    },
                 });
             } catch (e) {
                 err = e;
@@ -176,7 +176,7 @@ describe('#AirFormat', () => {
                 AirFormat.formatPassengerCategories({
                     'TESTABCD12==': {
                         'air:PassengerType': [],
-                    }
+                    },
                 });
             } catch (e) {
                 err = e;
@@ -188,7 +188,7 @@ describe('#AirFormat', () => {
             const parsed = AirFormat.formatPassengerCategories({
                 'TESTABCD12==': {
                     'air:PassengerType': 'ADT',
-                }
+                },
             });
 
             expect(parsed.passengerCounts.ADT).to.be.equal(1);
@@ -200,7 +200,7 @@ describe('#AirFormat', () => {
                 },
                 '3EvdYq7Q2BKAXSFvEAAAAA==': {
                     'air:PassengerType': ['CNN'],
-                }
+                },
             });
 
             expect(parsed.passengerCounts.ADT).to.be.equal(2);
@@ -213,7 +213,7 @@ describe('#AirFormat', () => {
                 },
                 '3EvdYq7Q2BKAXSFvEAAAAA==': {
                     'air:PassengerType': [{ Code: 'CNN' }],
-                }
+                },
             });
 
             expect(parsed.passengerCounts.ADT).to.be.equal(2);
@@ -235,8 +235,8 @@ describe('#AirFormat', () => {
                                 Amount: 'KRW94200',
                                 NotValidBefore: '2019-10-10',
                                 NotValidAfter: '2019-10-10',
-                                TaxAmount: 'KRW23500'
-                            }
+                                TaxAmount: 'KRW23500',
+                            },
                         },
                         'air:PassengerType': ['ADT'],
                         'air:BookingInfo': [
@@ -245,52 +245,52 @@ describe('#AirFormat', () => {
                                 CabinClass: 'Economy',
                                 FareInfoRef: 't7MhYq3R2BKASHnsEAAAAA==',
                                 SegmentRef: 't7MhYq3R2BKAJHnsEAAAAA==',
-                                HostTokenRef: 't7MhYq3R2BKAMHnsEAAAAA=='
+                                HostTokenRef: 't7MhYq3R2BKAMHnsEAAAAA==',
                             },
                         ],
                         'air:TaxInfo': {
                             't7MhYq3R2BKAOHnsEAAAAA==': {
                                 Category: 'AY',
                                 Amount: 'KRW6400',
-                                Key: 't7MhYq3R2BKAOHnsEAAAAA=='
+                                Key: 't7MhYq3R2BKAOHnsEAAAAA==',
                             },
                             't7MhYq3R2BKAPHnsEAAAAA==': {
                                 Category: 'US',
                                 Amount: 'KRW7100',
-                                Key: 't7MhYq3R2BKAPHnsEAAAAA=='
+                                Key: 't7MhYq3R2BKAPHnsEAAAAA==',
                             },
                             't7MhYq3R2BKAQHnsEAAAAA==': {
                                 'common_v47_0:TaxDetail': [
                                     {
                                         Amount: 'USD5.00',
-                                        OriginAirport: 'SLC'
+                                        OriginAirport: 'SLC',
                                     },
                                 ],
                                 Category: 'XF',
                                 Amount: 'KRW5200',
-                                Key: 't7MhYq3R2BKAQHnsEAAAAA=='
+                                Key: 't7MhYq3R2BKAQHnsEAAAAA==',
                             },
                             't7MhYq3R2BKARHnsEAAAAA==': {
                                 'common_v47_0:TaxDetail': [
                                     {
                                         Amount: 'USD4.20',
-                                        OriginAirport: 'SLC'
+                                        OriginAirport: 'SLC',
                                     },
                                 ],
                                 Category: 'ZP',
                                 Amount: 'KRW4800',
-                                Key: 't7MhYq3R2BKARHnsEAAAAA=='
-                            }
+                                Key: 't7MhYq3R2BKARHnsEAAAAA==',
+                            },
                         },
                         'air:FareCalc': 'SLC DL SFO 82.79XAVNA0BQ USD82.79END',
                         'air:ChangePenalty': {
                             'air:Percentage': '100.00',
-                            PenaltyApplies: 'Anytime'
+                            PenaltyApplies: 'Anytime',
                         },
                         'air:CancelPenalty': {
                             'air:Percentage': '100.00',
                             NoShow: 'true',
-                            PenaltyApplies: 'Anytime'
+                            PenaltyApplies: 'Anytime',
                         },
                         Key: 't7MhYq3R2BKANHnsEAAAAA==',
                         TotalPrice: 'KRW117700',
@@ -305,9 +305,9 @@ describe('#AirFormat', () => {
                         IncludesVAT: 'false',
                         ETicketability: 'Yes',
                         PlatingCarrier: 'DL',
-                        ProviderCode: '1G'
-                    }
-                }
+                        ProviderCode: '1G',
+                    },
+                },
             );
 
             expect(parsed.passengerCounts.ADT).to.be.equal(1);
@@ -323,7 +323,7 @@ describe('#AirFormat', () => {
                     'air:Amount': 'Amount',
                     'air:Percentage': '100',
                     PenaltyApplies: 'Anytime',
-                }
+                },
             });
 
             expect(parsed).to.be.an('object').and.to.have.keys([
@@ -346,7 +346,7 @@ describe('#AirFormat', () => {
                     'air:Percentage': '100',
                     NoShow: 'true',
                     PenaltyApplies: 'Anytime',
-                }
+                },
             });
 
             expect(parsed).to.be.an('object').and.to.have.keys([
@@ -365,7 +365,7 @@ describe('#AirFormat', () => {
 
         it('should correctly parse refundable', () => {
             const parsed = AirFormat.formatFarePricingInfo({
-                Refundable: 'true'
+                Refundable: 'true',
             });
 
             expect(parsed).to.be.an('object').and.to.include.any.keys([
@@ -377,7 +377,7 @@ describe('#AirFormat', () => {
 
         it('should correctly parse eTicketability', () => {
             const parsed = AirFormat.formatFarePricingInfo({
-                eTicketability: 'Yes'
+                eTicketability: 'Yes',
             });
 
             expect(parsed).to.be.an('object').and.to.include.any.keys([
@@ -389,7 +389,7 @@ describe('#AirFormat', () => {
 
         it('should correctly parse latestTicketingTime', () => {
             const parsed = AirFormat.formatFarePricingInfo({
-                LatestTicketingTime: '2019-05-14T23:59:00.000+09:00'
+                LatestTicketingTime: '2019-05-14T23:59:00.000+09:00',
             });
 
             expect(parsed).to.be.an('object').and.to.include.any.keys([

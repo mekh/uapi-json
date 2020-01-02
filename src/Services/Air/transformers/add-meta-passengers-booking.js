@@ -10,7 +10,7 @@ module.exports = params => {
             passNumber: num,
             firstName: first,
             lastName: last,
-            gender
+            gender,
         } = passenger;
 
         const due = moment().add(12, 'month').format('DDMMMYY');

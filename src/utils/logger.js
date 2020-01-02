@@ -21,7 +21,12 @@ const serialize = data => data
             }
         }
 
-        return item;
+        try {
+            return item.toString()
+                .replace(/\s*\n\s*/g, ' ');
+        } catch (e) {
+            return item;
+        }
     })
     .join(' ');
 
@@ -34,11 +39,6 @@ logger = {
     debug(...data) { this.log('DEBUG', data); },
     trace(...data) { this.log('TRACE', data); },
 };
-
-// Object.defineProperty(logger, 'log', {
-//     value(level, ...data) { log(level, serialize(...data)); },
-//     writable: false,
-// });
 
 module.exports = {
     logger,

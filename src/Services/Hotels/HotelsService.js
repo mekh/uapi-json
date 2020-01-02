@@ -8,7 +8,7 @@ const templates = require('./templates');
 
 module.exports = function (settings) {
     const {
-        auth, debug, production, options
+        auth, debug, production, options,
     } = validateServiceSettings(settings);
     const config = getConfig(auth.region, production);
     return {
@@ -21,7 +21,7 @@ module.exports = function (settings) {
             HotelsParser.HOTELS_ERROR,
             HotelsParser.HOTELS_SEARCH_REQUEST,
             debug,
-            options
+            options,
         ),
         rates: uApiRequest(
             config.HotelsService.url,
@@ -32,7 +32,7 @@ module.exports = function (settings) {
             HotelsParser.HOTELS_ERROR,
             HotelsParser.HOTELS_RATE_REQUEST,
             debug,
-            options
+            options,
         ),
         book: uApiRequest(
             config.HotelsService.url,
@@ -43,7 +43,7 @@ module.exports = function (settings) {
             HotelsParser.HOTELS_ERROR,
             HotelsParser.HOTELS_BOOK_REQUEST,
             debug,
-            options
+            options,
         ),
         cancelBook: uApiRequest(
             config.UniversalRecord.url,
@@ -54,7 +54,7 @@ module.exports = function (settings) {
             HotelsParser.HOTELS_ERROR,
             HotelsParser.HOTELS_CANCEL_BOOK_REQUEST,
             debug,
-            options
+            options,
         ),
     };
 };

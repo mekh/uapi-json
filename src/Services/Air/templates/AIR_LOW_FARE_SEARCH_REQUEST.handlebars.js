@@ -1,32 +1,29 @@
-module.exports = `
-<!--Release 33-->
-<!--Version Dated as of 14/Aug/2015 18:47:44-->
-<!--Air Low Fare Search For Galileo({{provider}}) Request-->
+module.exports = uapiVersion => `
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
         {{#if async}}
         <air:LowFareSearchAsynchReq
             AuthorizedBy="user" TraceId="{{requestId}}" TargetBranch="{{TargetBranch}}"
             ReturnUpsellFare="true"
-            xmlns:air="http://www.travelport.com/schema/air_v47_0"
-            xmlns:com="http://www.travelport.com/schema/common_v47_0"
+            xmlns:air="http://www.travelport.com/schema/air_${uapiVersion}"
+            xmlns:com="http://www.travelport.com/schema/common_${uapiVersion}"
             >
         {{else}}
         <air:LowFareSearchReq
             AuthorizedBy="user" TraceId="{{requestId}}" TargetBranch="{{TargetBranch}}"
             ReturnUpsellFare="true"
-            xmlns:air="http://www.travelport.com/schema/air_v47_0"
-            xmlns:com="http://www.travelport.com/schema/common_v47_0"
+            xmlns:air="http://www.travelport.com/schema/air_${uapiVersion}"
+            xmlns:com="http://www.travelport.com/schema/common_${uapiVersion}"
             >
         {{/if}}
             <com:BillingPointOfSaleInfo OriginApplication="uAPI"/>
             {{#legs}}
             <air:SearchAirLeg>
                 <air:SearchOrigin>
-                    <com:CityOrAirport Code="{{from}}" PreferCity="true"/>
+                    <com:CityOrAirport Code="{{from}}" {{#if preferAirportFrom}} PreferCity="false"{{else}} PreferCity="true" {{/if}}/>
                 </air:SearchOrigin>
                 <air:SearchDestination>
-                    <com:CityOrAirport Code="{{to}}" PreferCity="true"/>
+                    <com:CityOrAirport Code="{{to}}" {{#if preferAirportTo}} PreferCity="false"{{else}} PreferCity="true" {{/if}}/>
                 </air:SearchDestination>
                 <air:SearchDepTime PreferredTime="{{departureDate}}"/>
                 <air:AirLegModifiers>
@@ -79,18 +76,18 @@ module.exports = `
                 {{/if}}
             >
                 <air:PreferredProviders>
-                    <com:Provider Code="{{provider}}" xmlns:com="http://www.travelport.com/schema/common_v47_0"/>
+                    <com:Provider Code="{{provider}}" xmlns:com="http://www.travelport.com/schema/common_${uapiVersion}"/>
                 </air:PreferredProviders>
                 {{#if carriers}}
                 <air:PermittedCarriers>
                     {{#carriers}}
-                        <com:Carrier Code="{{.}}" xmlns:com="http://www.travelport.com/schema/common_v47_0"/>
+                        <com:Carrier Code="{{.}}" xmlns:com="http://www.travelport.com/schema/common_${uapiVersion}"/>
                     {{/carriers}}
                 </air:PermittedCarriers>
                 {{/if}}
             </air:AirSearchModifiers>
             {{#passengers}}
-            <com:SearchPassenger Code="{{ageCategory}}"{{#if child}} Age="9"{{/if}} xmlns:com="http://www.travelport.com/schema/common_v47_0"/>
+            <com:SearchPassenger Code="{{ageCategory}}"{{#if isChild}} Age="{{age}}"{{/if}} xmlns:com="http://www.travelport.com/schema/common_${uapiVersion}"/>
             {{/passengers}}
             {{#if pricing}}
             <air:AirPricingModifiers

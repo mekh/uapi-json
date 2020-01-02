@@ -1,9 +1,9 @@
-module.exports = `
+module.exports = uapiVersion => `
 <soapenv:Envelope
   xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-  xmlns:univ="http://www.travelport.com/schema/universal_v47_0"
-  xmlns:com="http://www.travelport.com/schema/common_v47_0"
-  xmlns:air="http://www.travelport.com/schema/air_v47_0"
+  xmlns:univ="http://www.travelport.com/schema/universal_${uapiVersion}"
+  xmlns:com="http://www.travelport.com/schema/common_${uapiVersion}"
+  xmlns:air="http://www.travelport.com/schema/air_${uapiVersion}"
   >
   <soapenv:Header/>
   <soapenv:Body>

@@ -8,22 +8,22 @@ const errorTypes = require('../../error-types');
 const HotelsValidationError = createErrorClass(
     'HotelsValidationError',
     'Hotels service validation error',
-    errorTypes.ValidationError
+    errorTypes.ValidationError,
 );
 const TravellersError = createErrorClass(
     'TravellersError',
     'Travellers information is incorrect',
-    HotelsValidationError
+    HotelsValidationError,
 );
 const ContactError = createErrorClass(
     'AddressError',
     'Address information is incorrect',
-    HotelsValidationError
+    HotelsValidationError,
 );
 const PaymentDataError = createErrorClass(
     'PaymentDataError',
     'Payment information is incorrect',
-    HotelsValidationError
+    HotelsValidationError,
 );
 Object.assign(HotelsValidationError, {
     TravellersError,
@@ -90,7 +90,7 @@ Object.assign(PaymentDataError, createErrorsList({
 const HotelsParsingError = createErrorClass(
     'HotelsParsingError',
     'Hotels service parsing error',
-    errorTypes.ParsingError
+    errorTypes.ParsingError,
 );
 Object.assign(HotelsParsingError, createErrorsList({
     SearchParsingError: 'Cant parse XML response. #HotelsParser.searchParse()',
@@ -104,7 +104,7 @@ Object.assign(HotelsParsingError, createErrorsList({
 const HotelsRuntimeError = createErrorClass(
     'HotelsRuntimeError',
     'Hotels service runtime error',
-    errorTypes.RuntimeError
+    errorTypes.RuntimeError,
 );
 Object.assign(HotelsRuntimeError, createErrorsList({
     NoEnginesResults: 'None of the enabled engines could fulfill your request',

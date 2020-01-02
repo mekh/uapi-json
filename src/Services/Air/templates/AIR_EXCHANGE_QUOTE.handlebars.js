@@ -1,19 +1,19 @@
-module.exports = `
+module.exports = uapiVersion => `
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
         <air:AirExchangeQuoteReq TraceId="{{requestId}}"
-                xmlns:air="http://www.travelport.com/schema/air_v47_0"
-                xmlns:com="http://www.travelport.com/schema/common_v47_0"
+                xmlns:air="http://www.travelport.com/schema/air_${uapiVersion}"
+                xmlns:com="http://www.travelport.com/schema/common_${uapiVersion}"
                 AuthorizedBy="user"
                 TargetBranch="{{TargetBranch}}">
 
             <com:BillingPointOfSaleInfo
-                    xmlns:com="http://www.travelport.com/schema/common_v47_0"
+                    xmlns:com="http://www.travelport.com/schema/common_${uapiVersion}"
                     OriginApplication="UAPI"/>
 
             {{#if emulatePcc}}
                 <com:OverridePCC ProviderCode="{{provider}}"
-                                 xmlns:com="http://www.travelport.com/schema/common_v47_0"
+                                 xmlns:com="http://www.travelport.com/schema/common_${uapiVersion}"
                                  PseudoCityCode="{{emulatePcc}}"
                 />
             {{/if}}

@@ -1,4 +1,4 @@
-# Description 
+# Description
 [![Build Status](https://travis-ci.org/Travelport-Ukraine/uapi-json.svg?branch=master)](https://travis-ci.org/Travelport-Ukraine/uapi-json)
 [![Coverage](https://img.shields.io/codecov/c/github/Travelport-Ukraine/uapi-json/stable.svg)](https://codecov.io/gh/Travelport-Ukraine/uapi-json/branch/stable)
 [![NPM](https://img.shields.io/npm/dt/uapi-json.svg)](https://www.npmjs.com/package/uapi-json)
@@ -49,10 +49,10 @@ const AirService = uAPI.createAirService(settings);
 
 AirService.importPNR().catch((err) => {
   if (err instanceof uAPI.errors.Common.ValidationError) {
-    console.log('Validation error occured');
+    console.log('Validation error occurred');
   }
   if (err instanceof uAPI.errors.Request.RequestValidationError) {
-    console.log('Validation error occured in request');
+    console.log('Validation error occurred in request');
   }
   if (err instanceof uAPI.errors.Request.RequestValidationError.ParamsMissing) {
     console.log('Params are missing for request');
@@ -61,7 +61,7 @@ AirService.importPNR().catch((err) => {
 ```
 
 As [`node-errors-helpers`](https://github.com/Travelport-Ukraine/errors-helpers) library
-is used for errors generating, we strongly reccomend you to tak a look at it.
+is used for errors generating, we strongly recommend you to tak a look at it.
 It also has several useful helpers to handle errors.
 
 # Settings
@@ -84,7 +84,7 @@ It also has several useful helpers to handle errors.
 | autoClose | `Boolean` | Optional. Used only in `TerminalService`. Defines if service should make `closeSession` request. |
 | options | `Object` | {} | Optional. User for all services to all additional options like custom log function, etc. See `options` description [bellow](#options). |
 
-### Additional options 
+### Additional options
 <a name="options"></a>
 
 `logFunction` - set custom logging function that should match next shape `(...args) => {}`. Will receive all requests and responses from uapi/terminal.

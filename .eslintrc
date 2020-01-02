@@ -1,33 +1,33 @@
 {
-  "extends": "airbnb-base",
-  "plugins": [
-    "import"
-  ],
-  "rules": {
-    "indent": [2, 4],
-    "consistent-return": 0,
-    "global-require": 1,
-    "func-names": 0,
-    "arrow-parens": 0,
-    "prefer-template": 0,
-    "arrow-body-style": 0,
-    "comma-dangle": ["error", {
-      "arrays": "always-multiline",
-      "functions": "never",
-      "objects": "only-multiline"
-    }],
-    "max-len": ["error", 120, 4, {
-      "ignoreRegExpLiterals": true,
-      "ignoreUrls": true,
-      "ignoreComments": false,
-      "ignoreStrings": true,
-      "ignoreTemplateLiterals": true
-    }],
-    "no-unused-vars": ["error",
-      { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_" }
+    "extends": "airbnb-base",
+    "plugins": [
+        "import"
     ],
-    "import/no-extraneous-dependencies": ["error",
-      {"devDependencies": ["**/*.test.js", "**/*.spec.js", "**/*.mock.js"]}
-    ]
-  }
+    "rules": {
+        "indent": [2, 4],
+        "consistent-return": 0,
+        "global-require": 1,
+        "func-names": 0,
+        "arrow-parens": 0,
+        "prefer-template": 0,
+        "arrow-body-style": 0,
+        "comma-dangle": ["error", {
+            "arrays": "always-multiline",
+            "functions": "always-multiline",
+            "objects": "always-multiline"
+        }],
+        "max-len": ["error", 120, 4, {
+            "ignoreRegExpLiterals": true,
+            "ignoreUrls": true,
+            "ignoreComments": false,
+            "ignoreStrings": true,
+            "ignoreTemplateLiterals": true
+        }],
+        "no-unused-vars": ["error",
+            { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_" }
+        ],
+        "import/no-extraneous-dependencies": ["error",
+            {"devDependencies": ["**/*.test.js", "**/*.spec.js", "**/*.mock.js"]}
+        ]
+    }
 }

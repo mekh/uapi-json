@@ -31,7 +31,7 @@ const validateParams = (service, auth, reqType) => {
 /**
  * basic function for requests/responses
  * @param  {string} service          service url for current response (gateway)
- * @param  {object} credentials             {username,password,targetBranch,provider} - credentials
+ * @param  {object} credentials      {username,password,targetBranch,provider} - credentials
  * @param  {string} reqType          url to file with xml for current request
  * @param  {object} rootObject
  * @param  {function} validateFunction function for validation
@@ -50,15 +50,16 @@ module.exports = (
     errorHandler,
     parseFunction,
     debugMode = false,
-    options = {}
+    options = {},
 ) => {
     // Assign default value
     const auth = { ...credentials };
     auth.provider = auth.provider || '1G';
     auth.region = auth.region || 'emea';
 
-    const config = configInit(auth.region);
+    const config = configInit(auth.region, options.production);
     const log = options.logFunction || logger;
+    const uapiVersion = options.uapiVersion || 'v47_0';
 
     // Performing checks
     validateParams(service, auth, reqType);
@@ -70,8 +71,8 @@ module.exports = (
             log.debug('Input params:', params);
         }
 
-        // create a v47 uAPI parser with default params and request data in env
-        const uParser = new Parser(rootObject, 'v47_0', params, debugMode, null, auth.provider);
+        // create uAPI parser with default params and request data in env
+        const uParser = new Parser(rootObject, uapiVersion, params, debugMode, null, auth.provider);
 
         const validateInput = () => (
             Promise.resolve(params)
@@ -157,7 +158,7 @@ module.exports = (
                     params,
                     debugMode,
                     errParserConfig,
-                    auth.provider
+                    auth.provider,
                 );
                 const errData = errParser.mergeLeafRecursive(parsedXML['SOAP:Fault'][0]); // parse error data
                 return errorHandler.call(errParser, errData);
@@ -180,7 +181,7 @@ module.exports = (
 
         return validateInput()
             .then(handlebars.compile)
-            .then(template => prepareRequest(template, auth, params))
+            .then(template => prepareRequest(template, auth, params, uapiVersion))
             .then(sendRequest)
             .then(parseResponse)
             .then(validateSOAP)

@@ -35,7 +35,7 @@ module.exports = function (settings) {
         const processedResponse = previousResponse
             ? screenFunctions.mergeResponse(
                 previousResponse,
-                response.join('\n')
+                response.join('\n'),
             )
             : response.join('\n');
         if (stopMD(processedResponse)) {
@@ -128,14 +128,14 @@ module.exports = function (settings) {
             .then(
                 sessionToken => service.closeSession({
                     sessionToken,
-                })
+                }),
             ).then(
                 (response) => {
                     Object.assign(state, {
                         terminalState: TERMINAL_STATE_CLOSED,
                     });
                     return response;
-                }
+                },
             ),
     };
 
@@ -155,11 +155,11 @@ module.exports = function (settings) {
                     log.warn('UAPI-JSON WARNING: Process left TerminalService session open');
                     log.warn('UAPI-JSON WARNING: Session closing');
                     terminal.closeSession().then(
-                        () => log.warn('UAPI-JSON WARNING: Session closed')
+                        () => log.warn('UAPI-JSON WARNING: Session closed'),
                     ).catch(
                         () => {
                             throw new TerminalRuntimeError.ErrorClosingSession();
-                        }
+                        },
                     );
                 }
             }

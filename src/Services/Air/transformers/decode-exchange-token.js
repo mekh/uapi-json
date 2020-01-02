@@ -29,5 +29,5 @@ module.exports = params => inflate(params.exchangeToken)
         return { ...params, xml: resultXml };
     })
     .catch(e => Promise.reject(
-        new AirRuntimeError.ExchangeTokenIncorrect(params, e)
+        new AirRuntimeError.ExchangeTokenIncorrect(params, e),
     ));

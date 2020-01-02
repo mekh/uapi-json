@@ -46,7 +46,7 @@ describe('uapi-parser config functions tests', () => {
             'fullCollapseListObj',
             'fullCollapseSingleKeyedObj',
             'CollapseKeysOnly',
-            'dropKeys'
+            'dropKeys',
         );
     });
 
@@ -58,7 +58,7 @@ describe('uapi-parser config functions tests', () => {
             'fullCollapseListObj',
             'fullCollapseSingleKeyedObj',
             'CollapseKeysOnly',
-            'dropKeys'
+            'dropKeys',
         );
     });
 });

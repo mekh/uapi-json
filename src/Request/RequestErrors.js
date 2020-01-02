@@ -8,7 +8,7 @@ const errorTypes = require('../error-types');
 const RequestValidationError = createErrorClass(
     'RequestValidationError',
     'Request validation error',
-    errorTypes.ValidationError
+    errorTypes.ValidationError,
 );
 Object.assign(RequestValidationError, createErrorsList({
     ServiceUrlMissing: 'Service URL is missing',
@@ -21,7 +21,7 @@ Object.assign(RequestValidationError, createErrorsList({
 const RequestRuntimeError = createErrorClass(
     'RequestRuntimeError',
     'Request runtime error',
-    errorTypes.RuntimeError
+    errorTypes.RuntimeError,
 );
 Object.assign(RequestRuntimeError, createErrorsList({
     TemplateFileMissing: 'XML template not found for request',
@@ -34,7 +34,7 @@ Object.assign(RequestRuntimeError, createErrorsList({
 const RequestSoapError = createErrorClass(
     'RequestSoapError',
     'Request SOAP error',
-    errorTypes.SoapError
+    errorTypes.SoapError,
 );
 Object.assign(RequestSoapError, createErrorsList({
     SoapUnexpectedError: 'Unexpected error during soap request',

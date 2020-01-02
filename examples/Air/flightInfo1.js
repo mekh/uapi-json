@@ -1,20 +1,22 @@
+const moment = require('moment');
 const uAPI = require('../../index');
 const config = require('../../test/testconfig');
+const { logger: log } = require('../../src/utils/logger');
 
 
 const AirService = uAPI.createAirService({
-  auth: config,
-  debug: 2,
-  production: true,
+    auth: config,
+    debug: 2,
+    production: true,
 });
 
 const params = {
-  airline: 'OS',
-  flightNumber: '703',
-  departure: '2016-11-21',
+    airline: 'OS',
+    flightNumber: '703',
+    departure: moment().add(55, 'days').format('YYYY-MM-DD'),
 };
 
 AirService.flightInfo(params).then(
-  data => console.log(data),
-  err => console.log(err)
+    data => log.debug(data),
+    err => log.error(err)
 );

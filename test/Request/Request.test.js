@@ -16,7 +16,7 @@ const { logger } = require('../../src/utils/logger');
 
 const errorXML = fs.readFileSync(path.join(
     __dirname,
-    '../FakeResponses/Other/UnableToFareQuoteError.xml'
+    '../FakeResponses/Other/UnableToFareQuoteError.xml',
 )).toString();
 
 const serviceParams = [
@@ -117,7 +117,7 @@ describe('#Request', () => {
             const log = {
                 debug: sinon.spy((...args) => {
                     logger.debug(args);
-                })
+                }),
             };
 
             const params = serviceParams.concat([3]).concat([{ logFunction: log }]);

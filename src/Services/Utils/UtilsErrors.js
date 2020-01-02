@@ -8,7 +8,7 @@ const errorTypes = require('../../error-types');
 const UtilsValidationError = createErrorClass(
     'UtilsValidationError',
     'Utils service validation error',
-    errorTypes.ValidationError
+    errorTypes.ValidationError,
 );
 Object.assign(UtilsValidationError, createErrorsList({
     CurrenciesMissing: 'Missing currencies',
@@ -18,14 +18,14 @@ Object.assign(UtilsValidationError, createErrorsList({
 const UtilsParsingError = createErrorClass(
     'UtilsParsingError',
     'Utils service parsing error',
-    errorTypes.ParsingError
+    errorTypes.ParsingError,
 );
 
 // Runtime errors
 const UtilsRuntimeError = createErrorClass(
     'UtilsRuntimeError',
     'Utils service runtime error',
-    errorTypes.RuntimeError
+    errorTypes.RuntimeError,
 );
 
 module.exports = {

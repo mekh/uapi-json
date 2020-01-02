@@ -10,7 +10,7 @@ const {
     AirParsingError,
 } = require('../../src/Services/Air/AirErrors');
 const {
-    RequestRuntimeError
+    RequestRuntimeError,
 } = require('../../src/Request/RequestErrors');
 const Parser = require('../../src/Request/uapi-parser');
 const errorsConfig = require('../../src/Request/errors-config');
@@ -93,15 +93,15 @@ const checkLowSearchFareXml = (filename) => {
                                                 expect(baggage).to.have.all.keys(['units', 'amount']);
                                                 expect(baggage.units).to.be.a('string');
                                                 expect(baggage.amount).to.be.a('number');
-                                            }
+                                            },
                                         );
                                         // Segment reference
                                         expect(segment.uapi_segment_ref).to.be.a('string');
-                                    }
+                                    },
                                 );
-                            }
+                            },
                         );
-                    }
+                    },
                 );
                 // Booking components
                 expect(proposal.bookingComponents).to.be.an('array').and.to.have.length.above(0);
@@ -115,7 +115,7 @@ const checkLowSearchFareXml = (filename) => {
                         expect(component.basePrice).to.match(/^[A-Z]{3}(\d+\.)?\d+$/);
                         expect(component.taxes).to.match(/^[A-Z]{3}(\d+\.)?\d+$/);
                         expect(component.uapi_fare_reference).to.be.a('string');
-                    }
+                    },
                 );
                 // Passenger fares
                 expect(proposal.passengerFares).to.be.an('object');
@@ -132,9 +132,9 @@ const checkLowSearchFareXml = (filename) => {
                         expect(fare.totalPrice).to.match(/^[A-Z]{3}(\d+\.)?\d+$/);
                         expect(fare.basePrice).to.match(/^[A-Z]{3}(\d+\.)?\d+$/);
                         expect(fare.taxes).to.match(/^[A-Z]{3}(\d+\.)?\d+$/);
-                    }
+                    },
                 );
-            }
+            },
         );
     });
 };
@@ -269,7 +269,7 @@ describe('#AirParser', () => {
                 result.exchangedTickets.forEach(
                     (t) => {
                         expect(t).to.match(ticketRegExp);
-                    }
+                    },
                 );
             }
             expect(result.uapi_ur_locator).to.match(pnrRegExp);
@@ -299,7 +299,7 @@ describe('#AirParser', () => {
                     expect(tax).to.be.an('object');
                     expect(tax.value).to.match(/^[A-Z]{3}(\d+\.)?\d+$/);
                     expect(tax.type).to.match(/^[A-Z]{2}$/);
-                }
+                },
             );
             // Passengers
             expect(result.passengers).to.be.an('array');
@@ -448,7 +448,7 @@ describe('#AirParser', () => {
                     const couponsStopover = [false, true, false, true];
                     const coupons = result.tickets.reduce(
                         (acc, ticket) => acc.concat(ticket.coupons),
-                        []
+                        [],
                     );
                     log.debug(coupons.map(c => c.stopover));
                     coupons.forEach((coupon, index) => {
@@ -481,7 +481,7 @@ describe('#AirParser', () => {
                         const couponsStopover = [false, true, false, true];
                         const coupons = result.tickets.reduce(
                             (acc, ticket) => acc.concat(ticket.coupons),
-                            []
+                            [],
                         );
 
                         log.debug(coupons);
@@ -556,7 +556,7 @@ describe('#AirParser', () => {
                     expect(result.priceInfoDetailsAvailable).to.equal(true);
                     expect(result.taxesInfo).to.have.length.above(0);
                     const detialedTaxes = result.taxesInfo.filter(
-                        tax => ['XF', 'ZP'].indexOf(tax.type) !== -1
+                        tax => ['XF', 'ZP'].indexOf(tax.type) !== -1,
                     );
                     expect(detialedTaxes).to.have.lengthOf(2);
                     detialedTaxes.forEach(
@@ -567,9 +567,9 @@ describe('#AirParser', () => {
                                     expect(detailInfo).to.have.all.keys(['airport', 'value']);
                                     expect(detailInfo.airport).to.match(/^[A-Z]{3}$/);
                                     expect(detailInfo.value).to.match(/^[A-Z]{3}(\d+\.)?\d+$/);
-                                }
+                                },
                             );
-                        }
+                        },
                     );
                 });
         });
@@ -703,7 +703,7 @@ describe('#AirParser', () => {
                 [
                     `${xmlFolder}/LowFaresSearch.2ADT1CNNIEVBKK.xml`,
                     `${xmlFolder}/LowFaresSearch.1ADTIEVPAR.xml`,
-                ].map(checkLowSearchFareXml)
+                ].map(checkLowSearchFareXml),
             )
                 .then(() => done())
                 .catch(done);
@@ -718,10 +718,10 @@ describe('#AirParser', () => {
                     (json) => {
                         const errData = uParser.mergeLeafRecursive(json['SOAP:Fault'][0]); // parse error data
                         return parseFunction.call(uParser, errData);
-                    }
+                    },
                 )
                 .catch(
-                    err => expect(err).to.be.an.instanceof(AirRuntimeError.NoResultsFound)
+                    err => expect(err).to.be.an.instanceof(AirRuntimeError.NoResultsFound),
                 );
         });
 
@@ -855,7 +855,7 @@ describe('#AirParser', () => {
             const parseFunction = airParser.AIR_PRICE_REQUEST_PRICING_SOLUTION_XML;
             const xml = fs.readFileSync(`${xmlFolder}/AirPricingSolution.IEVPAR.xml`).toString();
             const jsonSaved = JSON.parse(
-                fs.readFileSync(`${xmlFolder}/AirPricingSolution.IEVPAR.json`).toString()
+                fs.readFileSync(`${xmlFolder}/AirPricingSolution.IEVPAR.json`).toString(),
             );
             return uParser.parse(xml).then((json) => {
                 const jsonResult = parseFunction.call(uParser, json);
@@ -880,7 +880,7 @@ describe('#AirParser', () => {
             const parseFunction = airParser.AIR_PRICE_REQUEST_PRICING_SOLUTION_XML;
             const xml = fs.readFileSync(`${xmlFolder}/AirPricingSolution.IEVPAR.2ADT1CNN.xml`).toString();
             const jsonSaved = JSON.parse(
-                fs.readFileSync(`${xmlFolder}/AirPricingSolution.IEVPAR.2ADT1CNN.json`).toString()
+                fs.readFileSync(`${xmlFolder}/AirPricingSolution.IEVPAR.2ADT1CNN.json`).toString(),
             );
             return uParser.parse(xml).then((json) => {
                 const jsonResult = parseFunction.call(uParser, json);
@@ -922,7 +922,7 @@ describe('#AirParser', () => {
         const parseFunction = airParser.AIR_PRICE_REQUEST_PRICING_SOLUTION_XML;
         const xml = fs.readFileSync(`${xmlFolder}/AirPricingSolution-with-host-token.ICNHKG.xml`).toString();
         const jsonSaved = JSON.parse(
-            fs.readFileSync(`${xmlFolder}/AirPricingSolution-with-host-token.ICNHKG.json`).toString()
+            fs.readFileSync(`${xmlFolder}/AirPricingSolution-with-host-token.ICNHKG.json`).toString(),
         );
         return uParser.parse(xml).then((json) => {
             const jsonResult = parseFunction.call(uParser, json);
@@ -1034,14 +1034,14 @@ describe('#AirParser', () => {
                 expect(fareQuote.uapi_passenger_refs).to.be.an('array');
                 expect(fareQuote.uapi_passenger_refs).to.have.length.above(0);
                 fareQuote.uapi_passenger_refs.forEach(
-                    reference => expect(reference).to.be.a('string')
+                    reference => expect(reference).to.be.a('string'),
                 );
 
                 // Segment references
                 expect(fareQuote.uapi_segment_refs).to.be.an('array');
                 expect(fareQuote.uapi_segment_refs).to.have.length.above(0);
                 fareQuote.uapi_segment_refs.forEach(
-                    reference => expect(reference).to.be.a('string')
+                    reference => expect(reference).to.be.a('string'),
                 );
 
                 fareQuote.pricingInfos.forEach(
@@ -1072,7 +1072,7 @@ describe('#AirParser', () => {
                                 if (p.isTicketed) {
                                     expect(p.ticketNumber).to.be.a('string').and.to.match(ticketRegExp);
                                 }
-                            }
+                            },
                         );
 
                         expect(pricingInfo.fareCalculation).to.be.a('string').and.to.have.length.above(0);
@@ -1080,7 +1080,7 @@ describe('#AirParser', () => {
 
                         expect(pricingInfo.passengersCount).to.be.an('object');
                         Object.keys(pricingInfo.passengersCount).forEach(
-                            ptc => expect(pricingInfo.passengersCount[ptc]).to.be.a('number')
+                            ptc => expect(pricingInfo.passengersCount[ptc]).to.be.a('number'),
                         );
                         expect(pricingInfo.taxesInfo).to.be.an('array');
                         pricingInfo.taxesInfo.forEach(
@@ -1088,7 +1088,7 @@ describe('#AirParser', () => {
                                 expect(tax).to.be.an('object');
                                 expect(tax.value).to.match(/^[A-Z]{3}(\d+\.)?\d+$/);
                                 expect(tax.type).to.match(/^[A-Z]{2}$/);
-                            }
+                            },
                         );
                         // Checking baggage
                         expect(pricingInfo.baggage).to.be.an('array');
@@ -1098,9 +1098,9 @@ describe('#AirParser', () => {
                                 expect(baggage).to.have.all.keys(['units', 'amount']);
                                 expect(baggage.units).to.be.a('string');
                                 expect(baggage.amount).to.be.a('number');
-                            }
+                            },
                         );
-                    }
+                    },
                 );
             });
             // Checking segments format
@@ -1138,7 +1138,7 @@ describe('#AirParser', () => {
                     segment.techStops.forEach(stop => expect(stop).to.match(/^[A-Z]{3}$/));
                     // Segment reference
                     expect(segment.uapi_segment_ref).to.be.a('string');
-                }
+                },
             );
 
             if (result.serviceSegments) {
@@ -1180,7 +1180,7 @@ describe('#AirParser', () => {
                         expect(ticket.passengers[0]).to.have.all.keys(['firstName', 'lastName']);
                         expect(ticket.number).to.match(/\d{13}/);
                         expect(ticket.uapi_passenger_ref).to.be.a('string');
-                    }
+                    },
                 );
             }
         });
@@ -1215,7 +1215,7 @@ describe('#AirParser', () => {
                 .then((result) => {
                     testBooking(result);
                     const detailedTaxes = result[0].fareQuotes[0].pricingInfos[0].taxesInfo.filter(
-                        tax => ['XF', 'ZP'].indexOf(tax.type) !== -1
+                        tax => ['XF', 'ZP'].indexOf(tax.type) !== -1,
                     );
                     expect(detailedTaxes).to.have.lengthOf(2);
                     detailedTaxes.forEach(tax => {
@@ -1225,7 +1225,7 @@ describe('#AirParser', () => {
                                 expect(detailInfo).to.have.all.keys(['airport', 'value']);
                                 expect(detailInfo.airport).to.match(/^[A-Z]{3}$/);
                                 expect(detailInfo.value).to.match(/^[A-Z]{3}(\d+\.)?\d+$/);
-                            }
+                            },
                         );
                     });
                 });
@@ -1269,7 +1269,7 @@ describe('#AirParser', () => {
                         (email, index) => {
                             expect(email.index).to.equal(index + 1);
                             expect(email.email).to.be.a('string');
-                        }
+                        },
                     );
                 });
         });
@@ -1301,7 +1301,7 @@ describe('#AirParser', () => {
                 .then((result) => {
                     testBooking(result);
                     const issuedServiceSegments = result[0].serviceSegments.find(
-                        item => item.documentNumber !== undefined
+                        item => item.documentNumber !== undefined,
                     );
                     expect(issuedServiceSegments).to.be.an('object');
                 });
@@ -1734,7 +1734,7 @@ describe('#AirParser', () => {
                 expect(booking.segments[0].duration[0]).to.be.equal(0);
                 expect(booking.segments[0].plane[0]).to.be.equal('Unknown');
                 expect(booking.fareQuotes[0].endorsement).to.be.equal(
-                    'NONEND/CHNG FOC/PS ONLY REF AT ISSUING OFFICE ONLY'
+                    'NONEND/CHNG FOC/PS ONLY REF AT ISSUING OFFICE ONLY',
                 );
                 expect(booking.fareQuotes[0].tourCode).to.be.equal('SC001S17');
             }).catch(err => assert(false, 'Error during parsing' + err.stack));
@@ -2128,12 +2128,12 @@ describe('#AirParser', () => {
                     (json) => {
                         const errData = uParser.mergeLeafRecursive(json['SOAP:Fault'][0]); // parse error data
                         return parseFunction.call(uParser, errData);
-                    }
+                    },
                 )
                 .catch(
                     (err) => {
                         expect(err).to.be.an.instanceof(AirRuntimeError.UnableToRetrieve);
-                    }
+                    },
                 );
         });
         it('should correctly handle error of agreement', () => {
@@ -2145,13 +2145,13 @@ describe('#AirParser', () => {
                     (json) => {
                         const errData = uParser.mergeLeafRecursive(json['SOAP:Fault'][0]); // parse error data
                         return parseFunction.call(uParser, errData);
-                    }
+                    },
                 )
                 .catch(
                     (err) => {
                         expect(err).to.be.an.instanceof(AirRuntimeError.NoAgreement);
                         expect(err.data.pcc).to.be.equal('7J8J');
-                    }
+                    },
                 );
         });
     });

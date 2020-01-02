@@ -148,7 +148,7 @@ describe('#Utils', () => {
         const getFile = (name) => {
             const screen = path.join(
                 __dirname,
-                `./FakeResponses/Terminal/${name}.txt`
+                `./FakeResponses/Terminal/${name}.txt`,
             );
 
             return fs
@@ -186,7 +186,7 @@ describe('#Utils', () => {
                         'firstName',
                         'lastName',
                         'isCancelled',
-                        'date'
+                        'date',
                     );
                 });
             });
