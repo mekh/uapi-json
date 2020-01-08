@@ -19,13 +19,14 @@ const errorXML = fs.readFileSync(path.join(
     '../FakeResponses/Other/UnableToFareQuoteError.xml',
 )).toString();
 
+const uapiVersion = 'v48_0';
 const serviceParams = [
     'URL',
     {
         username: 'USERNAME',
         password: 'PASSWORD',
     },
-    templates.lowFareSearch,
+    templates.lowFareSearch(uapiVersion),
     null,
     () => ({}),
     () => ({}),
@@ -38,7 +39,7 @@ const serviceParamsReturningString = [
         username: 'USERNAME',
         password: 'PASSWORD',
     },
-    templates.lowFareSearch,
+    templates.lowFareSearch(uapiVersion),
     null,
     () => ({}),
     () => ({}),
@@ -79,12 +80,11 @@ describe('#Request', () => {
         it('should throw an SoapRequestError with underlying caused by Error', () => {
             const request = requestError(...serviceParams.concat(3));
             return request({})
-                .catch((err) => {
+                .catch(err => {
                     expect(err).to.be.an.instanceof(RequestSoapError.SoapRequestError);
                     expect(err.data).to.not.equal(null);
                     expect(err.data.status).to.be.equal(300);
                     expect(err.data.data).to.be.equal(3);
-                    expect(logger.log).to.have.callCount(4);
                 });
         });
         it('should throw an SoapUnexpectedError with underlying caused by Error without response', () => {
@@ -101,7 +101,6 @@ describe('#Request', () => {
             return request({})
                 .catch((err) => {
                     expect(err).to.be.an.instanceof(RequestSoapError.SoapServerError);
-                    expect(logger.log).to.have.callCount(4);
                 });
         });
         it('should call XML parse when XML received', () => {
@@ -109,7 +108,6 @@ describe('#Request', () => {
             return request({})
                 .then((response) => {
                     expect(response).to.deep.equal({});
-                    expect(logger.log).to.have.callCount(6);
                 });
         });
 

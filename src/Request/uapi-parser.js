@@ -209,7 +209,7 @@ Parser.prototype.parse = function (xml) {
 
             const end = new Date() - start;
             if (this.debug > 1) {
-                this.log.info('uAPI_Parse execution time: %dms', end);
+                this.log.info('uAPI_Parse execution time:', end);
             }
 
             return data[self.rootObject];
